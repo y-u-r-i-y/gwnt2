@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=UTF-8>
+    <title>Tomcat WebSocket Chat</title>
+    <script>
+        window.onclose = function() {
+            ws.send("quit");
+        };
+
+        var ws = new WebSocket("ws://localhost:8080/gwent/echo");
+        ws.onopen = function(){
+        };
+        ws.onmessage = function(message){
+            document.getElementById("chatlog").textContent += message.data + "\n";
+        };
+        function postToServer(){
+            ws.send(document.getElementById("msg").value);
+            document.getElementById("msg").value = "";
+        }
+        function closeConnect(){
+            ws.close();
+        }
+        var canvas = document.getElementById("board");
+        var ctx = canvas.getContext("2d");
+
+        var img = document.getElementById("background_img");
+        ctx.drawImage(img, 0, 0);
+
+    </script>
+</head>
+<body>
+    <div id="content">
+        <canvas id="board" width="1000" height="580" ondragover="allowDrop(event);" ondrop="drop(event);">
+            Canvas Not Supported use HTML5 friendly browser.
+        </canvas>
+        <img src="resources/canvas.png" id="background_img" style="display: none;"/>
+    </div>
+
+    <textarea id="chatlog" readonly></textarea><br/>
+    <input id="msg" type="text" />
+    <button type="submit" id="sendButton" onClick="postToServer()">Send!</button>
+    <button type="submit" id="closeButton" onClick="closeConnect()">End</button>
+</body>
+</html>

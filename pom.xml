@@ -2,10 +2,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.sye</groupId>
-    <artifactId>gwent-duel</artifactId>
+    <artifactId>gwnt-duel</artifactId>
     <packaging>war</packaging>
     <version>0.01-SNAPSHOT</version>
-    <name>gwent duel</name>
+    <name>gwnt duel</name>
     <url>http://maven.apache.org</url>
 
     <properties>
@@ -57,7 +57,7 @@
     </dependencies>
 
     <build>
-        <finalName>gwent</finalName>
+        <finalName>gwnt</finalName>
 
         <plugins>
             <plugin>

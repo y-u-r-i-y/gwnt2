@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>gwent try1</title>
+    <style>
+        #field {
+            width: 100%;
+            height: 400px;
+            background-color: gray;
+        }
+        #normal-cards {
+            width: 100%;
+            /*height: 200px;*/
+            background-color: darkslateblue;
+            text-align:center;
+        }
+        .card {
+            width: 55px;
+            height: 85px;
+            display: inline-block;
+            padding: 5px;
+            border-radius: 3px;
+            background-color: deepskyblue;
+            text-align: left;
+            position: relative;
+            top: 2px;
+            background-image: url("resources/gwent-card1.jpg");
+            background-size: 120%;
+            /*background-size: cover;*/
+            /*background-size: contain;*/
+        }
+        .card:hover {
+            top: -5px;
+        }
+        #close-combat, #ranged-combat, #siege {
+            display: inline-block;
+            width: 100%;
+            height: 100px;
+            background-color: darkslategrey;
+            margin: 0 5px 5px 0;
+        }
+        div {
+            outline:1px solid black;
+        }
+        .horn-target {
+            float: left;
+            width: 100px;
+            height: 100px;
+            background-color: green;
+            text-align: center;
+        }
+        .highlighted {
+            background-color: darkgoldenrod;
+        }
+        .highlighted:hover {
+            background-color: yellowgreen;
+        }
+
+        .played-row {
+            width: 100%;
+            height: 100%;
+            background-color: blueviolet;
+            text-align:center;
+        }
+    </style>
+
+</head>
+<body>
+    <script type="application/javascript">
+        function toArray(nodeList) {
+            for (var a = [], l = nodeList.length; l--; a[l] = nodeList[l]);
+            return a;
+        }
+
+        var isPlayingHorn = false;
+        var hornCard;
+        var toggleHighlightHornTargets = function() {
+            // https://developer.mozilla.org/ru/docs/Web/API/NodeList
+            var targets = document.getElementsByClassName('horn-target');
+            toArray(targets).forEach(
+                    function(hornTarget) {
+                        hornTarget.classList.toggle('highlighted');
+                    }
+            );
+
+        };
+        var prepareToPlayHorn = function(card) {
+            //var hornTargets = document.getElementsByClassName('horn'); // .classList.toggle('highlighted');
+            //hornTargets[0].className = 'highlighted';
+            toggleHighlightHornTargets();
+            isPlayingHorn = true;
+            hornCard = card;
+        };
+        var cancelPlayingHorn = function() {
+            if (isPlayingHorn) {
+                toggleHighlightHornTargets();
+                isPlayingHorn = false;
+            }
+        };
+        var playHorn = function(hornLocation) {
+            if (isPlayingHorn) {
+                hornLocation.appendChild(hornCard);
+                toggleHighlightHornTargets();
+                isPlayingHorn = false;
+            }
+        };
+
+        var clickOnCard = function(card) {
+            if (isPlayingHorn) {
+                cancelPlayingHorn();
+            }
+
+            var type = card.getAttribute("type");
+            var field;
+            if (type == "CLOSE") {
+                field = document.getElementById("close-combat-row");
+            } else if (type == "RANGED"){
+                field = document.getElementById("ranged-combat-row");
+            } else if (type == "SIEGE"){
+                field = document.getElementById("siege-row");
+            } else if (type == "HORN"){
+                prepareToPlayHorn(card);
+                return;
+            } else if (type == "LEADER"){
+
+            } else if (type == "WEATHER"){
+
+            }
+            if (typeof field !== 'undefined') {
+                field.appendChild(card);
+            }
+        };
+
+        window.onload = function() {
+            document.body.onselectstart = function() { return false; };
+            document.body.onmousedown = function() { return false; };
+
+            var cards = document.getElementsByClassName("card");
+            var nodes = Array.prototype.slice.call(cards, 0);
+            document.onmouseover = function(event) {
+                var element = event.target;
+                if (element.hasAttribute("description")) {
+                    document.getElementById("description-section").innerText = element.getAttribute("description");
+                } else {
+                    document.getElementById("description-section").innerText = "";
+                }
+                // console.log(e.target.id);
+            };
+            /*nodes.forEach(
+                    function(card) {
+                        card.onclick = function() {
+                            console.log(card.getAttribute('descr'));
+                        };
+                    });*/
+        };
+
+        //!! http://stackoverflow.com/questions/15010981/javascript-getting-custom-attribute-works-only-with-element-getattributeattrib
+        //http://www.primagames.com/games/witcher-3/tips/how-play-gwent-witcher-3-wild-hunt
+        // http://habrahabr.ru/post/247857/
+        // http://stackoverflow.com/questions/15010981/javascript-getting-custom-attribute-works-only-with-element-getattributeattrib
+        // http://toddmotto.com/attaching-event-handlers-to-dynamically-created-javascript-elements/
+        // http://stackoverflow.com/questions/13433799/why-doesnt-nodelist-have-foreach
+        // center image http://stackoverflow.com/questions/7055393/center-image-using-text-align-center
+    </script>
+    <div style="width: 1000px; margin: 0 auto;">
+    <div id="field">
+        <div id="his"></div>
+        <div id="yours" style="padding: 5px;">
+            <div id="close-combat" style="width: 100%;">
+                <div class="horn-target" onclick="playHorn(this)"></div>
+                <div id="close-combat-row" class="played-row" ></div>
+            </div>
+            <div id="ranged-combat" style="width: 100%;">
+                <div class="horn-target" onclick="playHorn(this)"></div>
+                <div id="ranged-combat-row" class="played-row"></div>
+            </div>
+            <div id="siege" style="width: 100%;">
+                <div class="horn-target" onclick="playHorn(this)"></div>
+                <div id="siege-row" class="played-row"></div>
+            </div>
+        </div>
+    </div>
+    <div id="hand">
+        <div id="leader" style="float: left; width: 100px; height: 100%;background-color: yellowgreen;">
+            <div id="card0" description="king" type="LEADER" class="card" ondblclick="clickOnCard(this)">K</div>
+        </div>
+        <div id="normal-cards" style="width: 100%; height: 100px;">
+            <div id="card1" description="close" type="CLOSE"  class="card" ondblclick="clickOnCard(this)">C</div>
+            <div id="card2" description="ranged" type="RANGED" class="card" ondblclick="clickOnCard(this)">R</div>
+            <div id="card3" description="siege" type="SIEGE"  class="card" ondblclick="clickOnCard(this)">S</div>
+            <div id="card4" description="horn" type="HORN"  class="card" ondblclick="clickOnCard(this)">H</div>
+            <div id="card5" description="weather" type="WEATHER" class="card" ondblclick="clickOnCard(this)">W</div>
+        </div>
+    </div>
+    <div id="description-section" style="width: 100%; height: 30px; background-color: black; color: white; text-align: center;">
+        description section
+    </div>
+    </div>
+</body>
+</html>

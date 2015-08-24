@@ -7,13 +7,13 @@
     </script>
     <style>
         div {
-            border: 1px solid grey;
+            outline: 1px solid grey;
             height: 100px;
         }
         #container {
             display: table;
             width: 100%;
-            height: 960px;
+            /*height: 960px;*/
             min-width: 800px;
         }
 
@@ -27,7 +27,7 @@
             width: 250px;
         }
         .row {
-            margin: 5px 30px 5px 30px;
+            margin: 2px 5px 2px 20px;
             position: relative;
         }
         .row-score-yours {
@@ -63,6 +63,7 @@
             width: 100px;
             height: 100%;
             float: left;
+            text-align: center;
             background-image: url("resources/horn-bkgrnd.jpg");
             background-size: 100%;
         }
@@ -91,15 +92,23 @@
         .card:hover {
             top: -5px;
         }
-        #big-card {
+        #description-section {
             width: 200px;
             height: 375px;
             position: absolute;
             top: 300px;
             right: 25px;
-            background-image: url("resources/gwent-card1.jpg");
-            background-size: 100%;
         }
+        #big-card {
+            width: 200px;
+            height: 375px;
+            top: 300px;
+            right: 25px;
+            /*background-image: url("resources/gwent-card1.jpg");*/
+            background-size: 100%;
+            border-radius: 10px;
+        }
+
         #weather-target {
             width: 250px;
             height: 140px;
@@ -109,10 +118,101 @@
             background-image: url("resources/weather-bgnd.jpg");
             background-size: 100%;
             }
-
+        .played-row {
+            text-align:center;
+        }
+        .highlighted {
+            outline: 2px solid gold;
+        }
     </style>
+    <script type="application/javascript">
+        document.onmouseover = function(event) {
+            var element = event.target;
+            if (element.hasAttribute("description")) {
+                document.getElementById("description-text").innerText = element.getAttribute("description");
+            } else {
+                document.getElementById("description-text").innerText = "";
+            }
+            // console.log(e.target.id);
+        };
+
+        function toArray(nodeList) {
+            for (var a = [], l = nodeList.length; l--; a[l] = nodeList[l]);
+            return a;
+        }
+
+        var isPlayingHorn = false;
+        var hornCard;
+        var toggleHighlightHornTargets = function() {
+            // https://developer.mozilla.org/ru/docs/Web/API/NodeList
+            var targets = document.getElementsByClassName('row-horn-target');
+            toArray(targets).forEach(
+                    function(hornTarget) {
+                        hornTarget.classList.toggle('highlighted');
+                    }
+            );
+
+        };
+        var prepareToPlayHorn = function(card) {
+            //var hornTargets = document.getElementsByClassName('horn'); // .classList.toggle('highlighted');
+            //hornTargets[0].className = 'highlighted';
+            toggleHighlightHornTargets();
+            isPlayingHorn = true;
+            hornCard = card;
+        };
+        var cancelPlayingHorn = function() {
+            if (isPlayingHorn) {
+                toggleHighlightHornTargets();
+                isPlayingHorn = false;
+            }
+        };
+        var playHorn = function(hornLocation) {
+            if (isPlayingHorn) {
+                hornLocation.appendChild(hornCard);
+                toggleHighlightHornTargets();
+                isPlayingHorn = false;
+            }
+        };
+        var singleClickOnCard = function(card) {
+            card.style.outline='2px solid gold';
+        };
+        var clickOnCard = function(card) {
+            if (isPlayingHorn) {
+                cancelPlayingHorn();
+            }
+            // http://stackoverflow.com/questions/14013131/javascript-get-background-image-url-of-div
+            var style = card.currentStyle || window.getComputedStyle(card, false),
+                    bg_image_url = style.backgroundImage.replace(/url\((['"])?(.*?)\1\)/gi, '$2').split(',')[0];
+
+            console.log(bg_image_url);
+
+            var urlString = 'url(' + bg_image_url + ')';
+            document.getElementById('big-card').style.backgroundImage =  urlString;
+
+            var type = card.getAttribute("type");
+            var field;
+            if (type == "CLOSE") {
+                field = document.getElementById("close-combat-row");
+            } else if (type == "RANGED"){
+                field = document.getElementById("ranged-combat-row");
+            } else if (type == "SIEGE"){
+                field = document.getElementById("siege-combat-row");
+            } else if (type == "HORN"){
+                prepareToPlayHorn(card);
+                return;
+            } else if (type == "LEADER"){
+
+            } else if (type == "WEATHER"){
+
+            }
+            if (typeof field !== 'undefined') {
+                field.appendChild(card);
+            }
+        };
+
+    </script>
 </head>
-<body style="margin: 2px;">
+<body style="margin: 2px;background-color: #101557;">
 
 <div id="container">
     <div id="left" style="position: relative;" >
@@ -125,7 +225,7 @@
 
     <div id="middle">
 
-        <div class="row" id="his-hand" style="margin-top: 15px; margin-bottom: 30px;">
+        <div class="row" id="his-hand" style="margin-bottom: 10px;">
             <div style="width: 100px; height: 100%; float: left;"></div>
             <div></div>
         </div>
@@ -145,30 +245,38 @@
             <div class="row-horn-target"></div>
             <div></div>
         </div>
+
+
+
         <div id="field-border" class="divider">
         </div>
-        <div class="row" id="row4">
-            <div class="row-score-yours">123</div>
-            <div class="row-horn-target"></div>
-            <div></div>
-        </div>
-        <div class="row" id="row5">
-            <div class="row-score-yours">123</div>
-            <div class="row-horn-target"></div>
-            <div></div>
-        </div>
-        <div class="row" id="row6">
-            <div class="row-score-yours">123</div>
-            <div class="row-horn-target"></div>
-            <div></div>
-        </div>
 
 
 
-        <div class="row" id="your-hand" style="margin-top: 30px;">
+        <div id="close-combat" class="row" >
+            <div class="row-horn-target" onclick="playHorn(this)"></div>
+            <div class="row-score-yours">123</div>
+
+            <div id="close-combat-row" class="played-row" ></div>
+        </div>
+
+        <div id="ranged-combat" class="row" >
+            <div class="row-horn-target" onclick="playHorn(this)"></div>
+            <div class="row-score-yours">123</div>
+            <div id="ranged-combat-row" class="played-row" ></div>
+        </div>
+
+        <div id="siege-combat" class="row" >
+            <div class="row-horn-target" onclick="playHorn(this)"></div>
+            <div class="row-score-yours">123</div>
+            <div id="siege-combat-row" class="played-row" ></div>
+        </div>
+
+
+        <div class="row" id="your-hand" style="margin-top: 10px;">
             <div style="width: 100px; height: 100%; float: left;"></div>
             <div>
-                <div id="card1" description="close" type="CLOSE"  class="card" ondblclick="clickOnCard(this)">C</div>
+                <div id="card1" description="close" type="CLOSE"  class="card" onclick="singleClickOnCard(this)" ondblclick="clickOnCard(this)" >C</div>
                 <div id="card2" description="ranged" type="RANGED" class="card" ondblclick="clickOnCard(this)">R</div>
                 <div id="card3" description="siege" type="SIEGE"  class="card" ondblclick="clickOnCard(this)">S</div>
                 <div id="card4" description="horn" type="HORN"  class="card" ondblclick="clickOnCard(this)">H</div>
@@ -176,13 +284,16 @@
             </div>
         </div>
 
-        <div id="description-section" style="height: 20px;">
-        </div>
+
 
     </div>
     <div id="right" style="position: relative;">
         <div style="width: 200px; height: 100px; position: absolute; top: 25px; right: 25px;"></div>
-        <div id="big-card" ></div>
+        <div id="description-section">
+            <div id="big-card" ></div>
+            <div id="description-text" style="height: 40px;color: white;">
+        </div>
+        </div>
         <div style="width: 200px; height: 100px; position: absolute; bottom: 25px; right: 25px;"></div>
     </div>
 </div>

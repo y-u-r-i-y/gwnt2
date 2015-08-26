@@ -87,9 +87,12 @@
             top: 2px;
             background-image: url("resources/gwent-card1.jpg");
             background-size: 120%;
+            transition: outline 0.5s linear;
+            outline: 0px solid gold;
         }
         .card:hover {
             top: -5px;
+            outline: 3px solid gold;
         }
         .center-div {
             position: absolute;
@@ -132,10 +135,16 @@
             width: 100%;
             height: 100px;
             background-color: black;
-            opacity: .9;
+            opacity: 0;
             color: white;
             z-index: 100;
-            visibility: hidden;
+            transition: opacity 0.5s linear;
+        }
+        .hidden {
+            opacity: 0;
+        }
+        .visible {
+            opacity: 1;
         }
     </style>
     <script type="application/javascript">
@@ -224,10 +233,14 @@
                 field.appendChild(card);
             }
         };
-        function showModal() {
-            document.getElementById('modal').style.visibility = 'visible';
+        var playShowHide = true; // make scoped
+        function showHide() {
+            document.getElementById('modal').classList.toggle('visible');
+            if (playShowHide) {
+                setTimeout(showHide, 1000);
+                playShowHide = false;
+            }
         }
-
     </script>
 </head>
 <body style="margin: 2px;background-color: #101557;">
@@ -298,11 +311,11 @@
         <div class="row" id="your-hand" style="margin-top: 10px;">
             <div style="width: 100px; height: 100%; float: left;"></div>
             <div>
-                <div id="card1" description="close" type="CLOSE"  class="card" onclick="singleClickOnCard(this)" ondblclick="clickOnCard(this)" >C</div>
-                <div id="card2" description="ranged" type="RANGED" class="card" ondblclick="clickOnCard(this)">R</div>
-                <div id="card3" description="siege" type="SIEGE"  class="card" ondblclick="clickOnCard(this)">S</div>
-                <div id="card4" description="horn" type="HORN"  class="card" ondblclick="clickOnCard(this)">H</div>
-                <div id="card5" description="weather" type="WEATHER" class="card" ondblclick="clickOnCard(this)">W</div>
+                <div id="card1" description="close"     type="CLOSE"    class="card" deck="NORTHERN" face="roche" onclick="singleClickOnCard(this)" ondblclick="clickOnCard(this)" >C</div>
+                <div id="card2" description="ranged"    type="RANGED"   class="card" deck="NORTHERN" face="keira" ondblclick="clickOnCard(this)">R</div>
+                <div id="card3" description="siege"     type="SIEGE"    class="card" deck="NORTHERN" face="catapult" ondblclick="clickOnCard(this)">S</div>
+                <div id="card4" description="horn"      type="HORN"     class="card" deck="NEUTRAL"  face="horn" ondblclick="clickOnCard(this)">H</div>
+                <div id="card5" description="weather"   type="WEATHER"  class="card" deck="NEUTRAL"  face="frost" ondblclick="clickOnCard(this)">W</div>
             </div>
         </div>
 
@@ -318,7 +331,7 @@
         </div>
 
         <div id="button" style="width: 200px; height: 100px; position: absolute; bottom: 25px; right: 25px;">
-            <button onclick="showModal()">show modal</button>
+            <button onclick="showHide()">show modal</button>
         </div>
 
     </div>

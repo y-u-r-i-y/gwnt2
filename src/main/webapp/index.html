@@ -233,12 +233,17 @@
                 field.appendChild(card);
             }
         };
-        var playShowHide = true; // make scoped
-        function showHide() {
+        function showHide(doBetweenTransitions) {
+            var play_back = ! document.getElementById('modal').classList.contains('visible');
             document.getElementById('modal').classList.toggle('visible');
-            if (playShowHide) {
-                setTimeout(showHide, 1000);
-                playShowHide = false;
+            if (play_back) {
+                setTimeout(
+                    function() {
+                        if (typeof doBetweenTransitions === 'function') {
+                            doBetweenTransitions();
+                        }
+                        showHide();
+                    }, 1000);
             }
         }
     </script>
@@ -331,7 +336,7 @@
         </div>
 
         <div id="button" style="width: 200px; height: 100px; position: absolute; bottom: 25px; right: 25px;">
-            <button onclick="showHide()">show modal</button>
+            <button onclick="showHide(function(){alert('!');})">show modal</button>
         </div>
 
     </div>

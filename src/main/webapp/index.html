@@ -120,13 +120,15 @@
 
         #weather-target {
             width: 250px;
-            height: 140px;
+            height: 135px;
             background-image: url("resources/weather-bgnd.jpg");
             background-size: 100%;
-            margin: 1px;
+            margin: 5px;
+            text-align: center;
+            padding-top: 15px;
             }
         #weather-target > div {
-            margin: 15px;
+            margin: 3px;
         }
         .played-row {
             text-align:center;
@@ -263,29 +265,52 @@
             }
             var type = card.getAttribute("type");
             var field;
-            if (type == "CLOSE") {
-                field = document.getElementById("close-combat-row");
-            } else if (type == "RANGED") {
-                field = document.getElementById("ranged-combat-row");
-            } else if (type == "SIEGE") {
-                field = document.getElementById("siege-combat-row");
-            } else if (type == "HORN") {
-                prepareToPlayHorn(card);
-                return;
-            } else if (type == "LEADER") {
-
-            } else if (type == "WEATHER") {
-
+            switch (type) {
+                case "CLOSE":
+                    field = document.getElementById("close-combat-row");
+                    break;
+                case "RANGED":
+                    field = document.getElementById("ranged-combat-row");
+                    break;
+                case "SIEGE":
+                    field = document.getElementById("siege-combat-row");
+                    break;
+                case "HORN":
+                    prepareToPlayHorn(card);
+                    return;
+                case "WEATHER":
+                    if (card.getAttribute('face') == "clear") {
+                        discardCardSmoothly(card);
+                        clearWeatherEffects();
+                        return;
+                    }
+                    field = document.getElementById("weather-target");
+                    break;
+                case "LEADER":
+                    break;
             }
+
             if (typeof field !== 'undefined') {
-                playCardSmoothly(card, field); //field.appendChild(card);
+                playCardSmoothly(card, field);
             }
         }
-        function playCardSmoothly(card, field) {
+        function clearWeatherEffects() {
+            var weather = document.getElementById("weather-target");
+            var currentWeatherEffects = weather.children;
+            /* flushElement(weather); */
 
-            // var doIt = function (card, field) { field.appendChild(card); };
+            toArray(currentWeatherEffects).forEach(
+                function(card) { discardCardSmoothly(card); });
+            clearDescription();
+        }
+        function discardCardSmoothly(card) {
             card.classList.toggle('hidden');
-
+            setTimeout(function(){
+                card.parentNode.removeChild(card);
+            }, 400);
+        }
+        function playCardSmoothly(card, field) {
+            card.classList.toggle('hidden');
             setTimeout(
                     function() {
                         field.appendChild(card);
@@ -300,7 +325,6 @@
                                     }
                                 }, 200);
                     }, 400);
-
         }
         function showHide(doBetweenTransitions) {
             var play_back = ! document.getElementById('modal').classList.contains('visible');
@@ -314,6 +338,16 @@
                         showHide();
                     }, 1000);
             }
+        }
+        function flushElement(e) {
+            alert("not implemented");
+        }
+        function clearDescription() {
+            var bc = document.getElementById('big-card');
+            bc.style.backgroundImage = '';
+            var d = document.getElementById('description-text');
+            d.value = '';
+
         }
         function addCardsFaces() {
             var cards = document.querySelectorAll('.card');
@@ -413,17 +447,21 @@
         <div class="row" id="your-hand" style="margin-top: 10px;text-align: center;">
             <div style="width: 100px; height: 100%; float: left;"></div>
             <div>
-                <div id="card1" description="close"     type="CLOSE" hero="true"   class="card" deck="NORTHERN" face="roche"
+                <div description="close"     type="CLOSE" hero="true"   class="card" deck="NORTHERN" face="roche"
                      ondblclick="clickOnCard(this)">C</div>
-                <div id="card2" description="ranged"    type="RANGED"   class="card" deck="NORTHERN" face="keira"
+                <div description="ranged"    type="RANGED"   class="card" deck="NORTHERN" face="keira"
                      ondblclick="clickOnCard(this)">R</div>
-                <div id="card3" description="siege"     type="SIEGE"    class="card" deck="NORTHERN" face="catapult"
+                <div description="siege"     type="SIEGE"    class="card" deck="NORTHERN" face="catapult"
                      ondblclick="clickOnCard(this)">S</div>
-                <div id="card4" description="horn"      type="HORN"     class="card" deck="NEUTRAL"  face="horn"
+                <div description="horn"      type="HORN"     class="card" deck="NEUTRAL"  face="horn"
                      ondblclick="clickOnCard(this)">H</div>
-                <div id="card5" description="weather"   type="WEATHER"  class="card" deck="NEUTRAL"  face="frost"
+                <div description="weather"   type="WEATHER"  class="card" deck="NEUTRAL"  face="frost"
                      ondblclick="clickOnCard(this)">W</div>
-                <div id="card6" description="weather"   type="DECOY"  class="card" deck="NEUTRAL"  face="decoy"
+                <div description="weather"   type="WEATHER"  class="card" deck="NEUTRAL"  face="rain"
+                     ondblclick="clickOnCard(this)">W</div>
+                <div description="weather"   type="WEATHER"  class="card" deck="NEUTRAL"  face="clear"
+                     ondblclick="clickOnCard(this)">W</div>
+                <div description="decoy"   type="DECOY"  class="card" deck="NEUTRAL"  face="decoy"
                      ondblclick="clickOnCard(this)">W</div>
             </div>
         </div>

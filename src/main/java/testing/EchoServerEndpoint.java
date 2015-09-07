@@ -1,4 +1,4 @@
-package trash;
+package testing;
 
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
@@ -33,7 +33,7 @@ public class EchoServerEndpoint {
     @OnError
     public void onError(Throwable t) {
         logger.info("error");
-        //t.printStackTrace();
+        t.printStackTrace();
     }
 
     @OnClose

@@ -1,4 +1,4 @@
-package trash;
+package testing;
 
 import javax.websocket.EncodeException;
 import javax.websocket.Encoder;

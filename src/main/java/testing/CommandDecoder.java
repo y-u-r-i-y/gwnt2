@@ -1,9 +1,8 @@
-package trash;
+package testing;
 
 import javax.websocket.*;
 import java.io.IOException;
 import java.io.Reader;
-import java.io.Writer;
 
 /**
  * Created by yuriy on 08.07.2015.

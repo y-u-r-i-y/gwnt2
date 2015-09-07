@@ -1,4 +1,4 @@
-package trash;
+package testing;
 
 /**
  * Created by yuriy on 08.07.2015.

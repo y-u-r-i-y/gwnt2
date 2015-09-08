@@ -152,12 +152,15 @@
         .hero {
             outline: 3px solid orangered;
         }
-        .highlighted {
+        .highlighted-horn {
             outline: 3px solid gold;
+        }
+        .highlighted-horn:hover {
+            border: 1px solid transparent;
         }
 
     </style>
-    <script type="application/javascript">
+    <script row="application/javascript">
         window.onload = function() {
             document.body.onselectstart = function() { return false; };
             document.body.onmousedown = function() { return false; };
@@ -200,7 +203,7 @@
             var targets = document.getElementsByClassName('row-horn yours');
             toArray(targets).forEach(
                     function(hornTarget) {
-                        hornTarget.classList.toggle('highlighted');
+                        hornTarget.classList.toggle('highlighted-horn');
                     }
             );
 
@@ -263,9 +266,9 @@
             if (isPlayingHorn) {
                 cancelPlayingHorn();
             }
-            var type = card.getAttribute("type");
+            var row = card.getAttribute("row");
             var field;
-            switch (type) {
+            switch (row) {
                 case "CLOSE":
                     field = document.getElementById("close-combat-row");
                     break;
@@ -300,14 +303,15 @@
             /* flushElement(weather); */
 
             toArray(currentWeatherEffects).forEach(
-                function(card) { discardCardSmoothly(card); });
+                function(card) { discardCardSmoothly(card, 1000); });
             clearDescription();
         }
-        function discardCardSmoothly(card) {
+        function discardCardSmoothly(card, timeout) {
+            timeout = timeout || 400;
             card.classList.toggle('hidden');
             setTimeout(function(){
                 card.parentNode.removeChild(card);
-            }, 400);
+            }, timeout);
         }
         function playCardSmoothly(card, field) {
             card.classList.toggle('hidden');
@@ -389,7 +393,7 @@
     <div id="left" style="position: relative;" >
         <div style="width:200px;height: 350px; position: absolute; top: 25px;left: 25px;"></div>
         <div id = "weather-target" class="center-div">
-             <div id="card21" class="card" description="weather" type="WEATHER" deck="NEUTRAL" face="fog">R</div>
+             <div id="card21" class="card" description="weather" row="WEATHER" deck="NEUTRAL" face="fog"></div>
         </div>
         <div style="width:200px;height: 350px; position: absolute; bottom: 25px; left: 25px;"></div>
     </div>
@@ -445,24 +449,27 @@
 
 
         <div class="row" id="your-hand" style="margin-top: 10px;text-align: center;">
-            <div style="width: 100px; height: 100%; float: left;"></div>
+            <div id="leader-container" style="width: 100px; height: 100%; float: left;">
+                <div description="foltest" row="LEADER" class="card" deck="NORTHERN" face="foltest_king"
+                     ondblclick="clickOnCard(this)"></div>
+            </div>
             <div>
-                <div description="close"     type="CLOSE" hero="true"   class="card" deck="NORTHERN" face="roche"
-                     ondblclick="clickOnCard(this)">C</div>
-                <div description="ranged"    type="RANGED"   class="card" deck="NORTHERN" face="keira"
-                     ondblclick="clickOnCard(this)">R</div>
-                <div description="siege"     type="SIEGE"    class="card" deck="NORTHERN" face="catapult"
-                     ondblclick="clickOnCard(this)">S</div>
-                <div description="horn"      type="HORN"     class="card" deck="NEUTRAL"  face="horn"
-                     ondblclick="clickOnCard(this)">H</div>
-                <div description="weather"   type="WEATHER"  class="card" deck="NEUTRAL"  face="frost"
-                     ondblclick="clickOnCard(this)">W</div>
-                <div description="weather"   type="WEATHER"  class="card" deck="NEUTRAL"  face="rain"
-                     ondblclick="clickOnCard(this)">W</div>
-                <div description="weather"   type="WEATHER"  class="card" deck="NEUTRAL"  face="clear"
-                     ondblclick="clickOnCard(this)">W</div>
-                <div description="decoy"   type="DECOY"  class="card" deck="NEUTRAL"  face="decoy"
-                     ondblclick="clickOnCard(this)">W</div>
+                <div description="close"     row="CLOSE" hero="true"   class="card" deck="NORTHERN" face="roche"
+                     ondblclick="clickOnCard(this)"></div>
+                <div description="ranged"    row="RANGED"   class="card" deck="NORTHERN" face="keira"
+                     ondblclick="clickOnCard(this)"></div>
+                <div description="siege"     row="SIEGE"    class="card" deck="NORTHERN" face="catapult"
+                     ondblclick="clickOnCard(this)"></div>
+                <div description="horn"      row="HORN"     class="card" deck="NEUTRAL"  face="horn"
+                     ondblclick="clickOnCard(this)"></div>
+                <div description="weather"   row="WEATHER"  class="card" deck="NEUTRAL"  face="frost"
+                     ondblclick="clickOnCard(this)"></div>
+                <div description="weather"   row="WEATHER"  class="card" deck="NEUTRAL"  face="rain"
+                     ondblclick="clickOnCard(this)"></div>
+                <div description="weather"   row="WEATHER"  class="card" deck="NEUTRAL"  face="clear"
+                     ondblclick="clickOnCard(this)"></div>
+                <div description="decoy"   row="DECOY"  class="card" deck="NEUTRAL"  face="decoy"
+                     ondblclick="clickOnCard(this)"></div>
             </div>
         </div>
 

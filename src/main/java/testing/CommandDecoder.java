@@ -7,7 +7,17 @@ import java.io.Reader;
 /**
  * Created by yuriy on 08.07.2015.
  */
-public class CommandDecoder implements Decoder.TextStream<Command> {
+public class CommandDecoder implements Decoder.Text<Command> {
+
+    @Override
+    public Command decode(String s) throws DecodeException {
+        return Command.valueOf(s);
+    }
+
+    @Override
+    public boolean willDecode(String s) {
+        return true;
+    }
 
     @Override
     public void init(EndpointConfig config) {
@@ -17,17 +27,4 @@ public class CommandDecoder implements Decoder.TextStream<Command> {
     public void destroy() {
     }
 
-    @Override
-    public Command decode(Reader reader) throws DecodeException, IOException {
-/*        try (JsonReader jsonReader = Json.createReader(reader)) {
-            JsonObject jsonObject = jsonReader.readObject();
-            Command command = new Command();
-            command.type =  jsonObject.get
-            sticker.setX(jsonSticker.getInt("x"));
-            sticker.setY(jsonSticker.getInt("y"));
-            sticker.setImage(jsonSticker.getString("sticker"));
-            return sticker;
-        }*/
-        return null;
-    }
 }

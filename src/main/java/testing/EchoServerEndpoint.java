@@ -21,10 +21,11 @@ public class EchoServerEndpoint {
             case "quit":
                 try {
                     session.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "Game ended"));
+                    return;
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-                break;
+                // break;
         }
         logger.info("Received:" + message);
         session.getBasicRemote().sendText("Echo: " + message);

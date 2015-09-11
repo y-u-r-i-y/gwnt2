@@ -6,9 +6,10 @@ import java.io.IOException;
 import java.util.logging.Logger;
 
 @ServerEndpoint(value = "/json",
-encoders = {CommandEncoder.class},
-decoders = {})
-public class JsonServerEndpoint {
+    encoders = {CommandEncoder.class},
+    decoders = {CommandDecoder.class}
+)
+public class EnumServerEndpoint {
 
     private Logger logger = Logger.getLogger(this.getClass().getName());
 
@@ -18,18 +19,19 @@ public class JsonServerEndpoint {
     }
 
     @OnMessage
-    public void onMessage(String message, Session session) throws IOException {
-        switch (message) {
-            case "quit":
+    public void onMessage(Command command, Session session) throws IOException {
+        switch (command) {
+            case EXIT:
                 try {
                     session.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "Game ended"));
+                    return;
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-                break;
+
         }
-        logger.info("Received:" + message);
-        session.getBasicRemote().sendText("Echo: " + message);
+        logger.info("Received:" + command);
+        session.getBasicRemote().sendText("Echo: " + command);
     }
 
     @OnClose

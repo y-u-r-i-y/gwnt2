@@ -9,10 +9,11 @@ import java.io.Writer;
 /**
  * Created by yuriy on 08.07.2015.
  */
-public class CommandEncoder implements Encoder.TextStream<Command> {
-    @Override
-    public void encode(Command object, Writer writer) throws EncodeException, IOException {
+public class CommandEncoder implements Encoder.Text<Command> {
 
+    @Override
+    public String encode(Command command) throws EncodeException {
+        return command.toString();
     }
 
     @Override
@@ -24,4 +25,5 @@ public class CommandEncoder implements Encoder.TextStream<Command> {
     public void destroy() {
 
     }
+
 }

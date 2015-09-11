@@ -32,4 +32,15 @@ public class CardTest {
         Card card = mapper.readValue(json, Card.class);
         System.out.println(card);
     }
+    @Test
+    public void testSimpleCardDeSerializeBothWays() throws IOException {
+        Card c = new Card("Geralt", "hero", CardType.CLOSE);
+        c.setHero(true);
+
+        ObjectMapper mapper = new ObjectMapper();
+        String asString = mapper.writeValueAsString(c);
+
+        Card card = mapper.readValue(asString, Card.class);
+        System.out.println(card);
+    }
 }

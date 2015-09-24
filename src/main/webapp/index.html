@@ -13,14 +13,14 @@
         #container {
             display: table;
             width: 100%;
-            min-width: 800px;
+            min-width: 1360px;
         }
 
         #left, #middle, #right {
             display: table-cell;
         }
         #left {
-            width: 300px;
+            width: 320px;
         }
         #right {
             width: 250px;
@@ -71,7 +71,7 @@
             transition: outline .5s linear;
             /*box-shadow: inset 2px -2px 5px 8px rgba(240,188,56,1);*/
         }
-        .yours {}
+        .your {}
         .divider {
             height: 20px;
             width: 800px;
@@ -83,7 +83,7 @@
             width: 55px;
             height: 85px;
             display: inline-block;
-            padding: 5px;
+            padding: 4px;
             border-radius: 3px;
             text-align: left;
             position: relative;
@@ -152,10 +152,10 @@
         .hero {
             outline: 3px solid orangered;
         }
-        .highlighted-horn {
+        .highlighted-target {
             outline: 3px solid gold;
         }
-        .highlighted-horn:hover {
+        .highlighted-target:hover {
             border: 1px solid transparent;
         }
 
@@ -185,10 +185,31 @@
                         bg_image_url = style.backgroundImage.replace(/url\((['"])?(.*?)\1\)/gi, '$2').split(',')[0];
                 var urlString = 'url(' + bg_image_url + ')';
                 document.getElementById('big-card').style.backgroundImage =  urlString;
+                highlightRow(card.getAttribute('row'));
             } else {
                 document.getElementById('big-card').style.backgroundImage =  "";
+                highlightRow(false);
             }
         };
+        var highlightedRow;
+        function highlightRow(row) {
+/*
+            if (row) {
+                var rowId;
+                switch (row) {
+                    case 'CLOSE': rowId = '#close-combat';
+                        break;
+                    case 'RANGED': rowId = '#ranged-combat';
+                        break;
+                    case 'SIEGE': rowId = '#siege-combat';
+                        break;
+                }
+                highlightedRow = document.querySelector(rowId);
+                if (highlightedRow)
+                    highlightedRow.classList.toggle('highlighted-target');
+            }
+*/
+        }
 
         function toArray(nodeList) {
             for (var a = [], l = nodeList.length; l--; a[l] = nodeList[l]);
@@ -198,12 +219,15 @@
         var isPlayingHorn = false; // TODO: make scoped
         var hornCard; // TODO: make scoped
 
+        var isPlayingDecoy = false; // TODO: make scoped
+        var decoyCard; // TODO: make scoped
+
         function toggleHighlightHornTargets () {
             // https://developer.mozilla.org/ru/docs/Web/API/NodeList
-            var targets = document.getElementsByClassName('row-horn yours');
+            var targets = document.querySelectorAll('.your .row-horn');
             toArray(targets).forEach(
                     function(hornTarget) {
-                        hornTarget.classList.toggle('highlighted-horn');
+                        hornTarget.classList.toggle('highlighted-target');
                     }
             );
 
@@ -226,6 +250,64 @@
                 isPlayingHorn = false;
             }
         }
+
+        function toggleHighlightDecoyTargets () {
+            // https://developer.mozilla.org/ru/docs/Web/API/NodeList
+            var targets = document.querySelectorAll('.your .card:not([hero])');
+            toArray(targets).forEach(
+                    function(hornTarget) {
+                        hornTarget.classList.toggle('highlighted-target');
+                    }
+            );
+
+        }
+        function prepareToPlayDecoy (card) {
+            toggleHighlightDecoyTargets();
+            isPlayingDecoy = true;
+            decoyCard = card;
+        }
+        function cancelPlayingDecoy () {
+            if (isPlayingDecoy) {
+                toggleHighlightHornTargets();
+                isPlayingDecoy = false;
+            }
+        }
+        function playDecoy(target) {
+            if (isPlayingDecoy) {
+
+                switchCards(decoyCard, target);
+                //playCardSmoothly(decoyCard, target);
+                toggleHighlightDecoyTargets();
+                isPlayingDecoy = false;
+            }
+        }
+        function switchCards(obj1, obj2) {
+            obj1.classList.toggle('hidden');
+            obj2.classList.toggle('hidden');
+
+            setTimeout(
+                    function() {
+                        var temp = document.createElement("div");
+                        obj1.parentNode.insertBefore(temp, obj1);
+
+                        // move obj1 to right before obj2
+                        obj2.parentNode.insertBefore(obj1, obj2);
+
+                        // move obj2 to right before where obj1 used to be
+                        temp.parentNode.insertBefore(obj2, temp);
+
+                        // remove temporary marker node
+                        temp.parentNode.removeChild(temp);
+
+                        setTimeout(
+                                function() {
+                                    obj1.classList.toggle('hidden');
+                                    obj2.classList.toggle('hidden');
+                                }, 200);
+                    }, 400);
+        }
+
+
 
         var time = 0;
         function singleClickOnCard (card) {
@@ -259,12 +341,26 @@
                 time = currentTime;
                 return false;
             }
-
-
+            debugger;
         }
+
+
+
         function clickOnCard(card) {
+            // TODO: should be decided on the server side:
+            // what to highlight or where to play
+            // in the manner of 'highlight: id1, id2, id3'
+
+            // https://css-tricks.com/almanac/selectors/a/attribute/
+
+
+
             if (isPlayingHorn) {
-                cancelPlayingHorn();
+                cancelPlayingHorn(); // because a new horn card may be clicked
+            }
+            if (isPlayingDecoy && goodDecoyTarget(card)) {
+                playDecoy(card);
+                return;
             }
             var row = card.getAttribute("row");
             var field;
@@ -280,6 +376,9 @@
                     break;
                 case "HORN":
                     prepareToPlayHorn(card);
+                    return;
+                case "DECOY":
+                    prepareToPlayDecoy(card);
                     return;
                 case "WEATHER":
                     if (card.getAttribute('face') == "clear") {
@@ -343,6 +442,12 @@
                     }, 1000);
             }
         }
+        function goodDecoyTarget(card) {
+            // TODO: should be decided on the server side
+            return card != decoyCard && !card.hasAttribute('hero')
+                    && card.getAttribute('row') != 'HORN'
+                    && card.parentNode.id != 'cards-to-play';
+        }
         function flushElement(e) {
             alert("not implemented");
         }
@@ -399,11 +504,6 @@
     </div>
 
     <div id="middle">
-<!--
-        <div class="row" id="his-hand" style="margin-bottom: 10px;">
-            <div style="width: 100px; height: 100%; float: left;"></div>
-            <div></div>
-        </div>-->
 
         <div class="row" id="row1">
             <div class="row-score-his">123</div>
@@ -427,34 +527,34 @@
         </div>
 
 
-
+        <span class="your">
         <div id="close-combat" class="row" >
-            <div class="row-horn yours" onclick="playHorn(this)"></div>
+            <div class="row-horn" onclick="playHorn(this)"></div>
             <div class="row-score-yours">123</div>
 
             <div id="close-combat-row" class="played-row" ></div>
         </div>
 
         <div id="ranged-combat" class="row" >
-            <div class="row-horn yours" onclick="playHorn(this)"></div>
+            <div class="row-horn" onclick="playHorn(this)"></div>
             <div class="row-score-yours">123</div>
             <div id="ranged-combat-row" class="played-row" ></div>
         </div>
 
         <div id="siege-combat" class="row" >
-            <div class="row-horn yours" onclick="playHorn(this)"></div>
+            <div class="row-horn" onclick="playHorn(this)"></div>
             <div class="row-score-yours">123</div>
             <div id="siege-combat-row" class="played-row" ></div>
         </div>
-
+        </span>
 
         <div class="row" id="your-hand" style="margin-top: 10px;text-align: center;">
             <div id="leader-container" style="width: 100px; height: 100%; float: left;">
                 <div description="foltest" row="LEADER" class="card" deck="NORTHERN" face="foltest_king"
                      ondblclick="clickOnCard(this)"></div>
             </div>
-            <div>
-                <div description="close"     row="CLOSE" hero="true"   class="card" deck="NORTHERN" face="roche"
+            <div id="cards-to-play">
+                <div description="close"     row="CLOSE"    hero="true"   class="card" deck="NORTHERN" face="roche"
                      ondblclick="clickOnCard(this)"></div>
                 <div description="ranged"    row="RANGED"   class="card" deck="NORTHERN" face="keira"
                      ondblclick="clickOnCard(this)"></div>
@@ -469,6 +569,11 @@
                 <div description="weather"   row="WEATHER"  class="card" deck="NEUTRAL"  face="clear"
                      ondblclick="clickOnCard(this)"></div>
                 <div description="decoy"   row="DECOY"  class="card" deck="NEUTRAL"  face="decoy"
+                     ondblclick="clickOnCard(this)"></div>
+                <div description="medic"   row="??"  class="card" deck="NORTHERN"  face="medic"
+                     ondblclick="clickOnCard(this)"></div>
+
+                <div description="close"   row="CLOSE"  class="card" deck="NORTHERN"  face="infantry"
                      ondblclick="clickOnCard(this)"></div>
             </div>
         </div>

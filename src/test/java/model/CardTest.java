@@ -1,5 +1,6 @@
 package model;
 
+import model.json.BaseJsonMappingTest;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -8,28 +9,21 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
 
-@RunWith(MockitoJUnitRunner.class)
-public class CardTest {
-    private ObjectMapper mapper;
-    @Before
-    public void setUp() {
-        mapper = new ObjectMapper();
-    }
+public class CardTest extends BaseJsonMappingTest{
 
     @Test
     public void testSimpleCardSerialize() throws IOException {
         Card c = new Card("Geralt", "hero", CardType.CLOSE);
         c.setHero(true);
 
-        ObjectMapper mapper = new ObjectMapper();
-        String asString = mapper.writeValueAsString(c);
+        String asString = toJson(c);
         System.out.println(asString);
 
     }
     @Test
     public void testSimpleCardDeSerialize() throws IOException {
         String json = "{\"face\":\"Geralt\",\"description\":\"hero\",\"type\":\"CLOSE\",\"hero\":true}";
-        Card card = mapper.readValue(json, Card.class);
+        Card card = jsonMapper.readValue(json, Card.class);
         System.out.println(card);
     }
     @Test
@@ -38,7 +32,7 @@ public class CardTest {
         c.setHero(true);
 
         ObjectMapper mapper = new ObjectMapper();
-        String asString = mapper.writeValueAsString(c);
+        String asString = toJson(c);
 
         Card card = mapper.readValue(asString, Card.class);
         System.out.println(card);

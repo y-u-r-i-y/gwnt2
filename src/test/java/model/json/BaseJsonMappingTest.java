@@ -20,7 +20,7 @@ public class BaseJsonMappingTest {
         jsonMapper = new ObjectMapper();
     }
     protected String toJson(Object object) throws IOException {
-        return toJson(object);
+        return jsonMapper.writeValueAsString(object);
     }
     protected <T> String fromJson(Object object, Class<T> toClass) throws IOException {
         // return jsonMapper.readValue(object, toClass);

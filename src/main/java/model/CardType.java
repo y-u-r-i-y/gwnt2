@@ -1,5 +1,5 @@
 package model;
 
 public enum CardType {
-    CLOSE, RANGE, SIEGE, DECOY, LEADER, WEATHER
+    CLOSE, RANGED, SIEGE, DECOY, LEADER, WEATHER
 }

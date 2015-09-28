@@ -22,10 +22,8 @@ public class BaseJsonMappingTest {
     protected String toJson(Object object) throws IOException {
         return jsonMapper.writeValueAsString(object);
     }
-    protected <T> String fromJson(Object object, Class<T> toClass) throws IOException {
-        // return jsonMapper.readValue(object, toClass);
-        return null;
+    protected <T> T fromJson(String string, Class<T> toClass) throws IOException {
+        return jsonMapper.readValue(string, toClass);
     }
-
 
 }

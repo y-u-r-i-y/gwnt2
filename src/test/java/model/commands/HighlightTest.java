@@ -16,7 +16,9 @@ public class HighlightTest extends BaseJsonMappingTest {
         Response response = new Response(Command.HIGHLIGHT, HighlightTarget.HORN_TARGETS);
 
         String asString = toJson(response);
-        System.out.println(asString);
 
+        System.out.println(
+                fromJson(asString, Response.class)
+        );
     }
 }

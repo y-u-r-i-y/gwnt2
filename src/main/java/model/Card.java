@@ -9,13 +9,17 @@ public class Card {
     private String description;
     private CardType type;
     private boolean isHero = false;
+    private boolean isHealer = false;
 
     public Card() {}
 
-    public Card(String face, String description, CardType type) {
+    public Card(String face, CardType type, boolean isHero, boolean isHealer,
+                String description) {
         this.face = face;
-        this.description = description;
         this.type = type;
+        this.isHero = isHero;
+        this.isHealer = isHealer;
+        this.description = description;
     }
 
     public String getFace() {
@@ -48,6 +52,14 @@ public class Card {
 
     public void setHero(boolean isHero) {
         this.isHero = isHero;
+    }
+
+    public boolean isHealer() {
+        return isHealer;
+    }
+
+    public void setHealer(boolean isHealer) {
+        this.isHealer = isHealer;
     }
 
     @Override

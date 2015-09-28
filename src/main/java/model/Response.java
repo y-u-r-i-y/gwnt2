@@ -9,8 +9,18 @@ public class Response {
     public Command command;
     public Object target;
 
+    public Response() {}
+
     public Response(Command command, Object target) {
         this.command = command;
         this.target = target;
+    }
+
+    @Override
+    public String toString() {
+        return "Response{" +
+                "command=" + command +
+                ", target=" + target +
+                '}';
     }
 }

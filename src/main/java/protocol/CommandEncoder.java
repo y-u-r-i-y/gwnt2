@@ -1,10 +1,8 @@
-package testing;
+package protocol;
 
 import javax.websocket.EncodeException;
 import javax.websocket.Encoder;
 import javax.websocket.EndpointConfig;
-import java.io.IOException;
-import java.io.Writer;
 
 /**
  * Created by yuriy on 08.07.2015.

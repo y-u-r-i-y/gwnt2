@@ -1,6 +1,4 @@
-package model;
-
-import model.commands.Command;
+package protocol;
 
 /**
  * Created by ysidorov on 25.09.15.

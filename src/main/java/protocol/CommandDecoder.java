@@ -1,8 +1,6 @@
-package testing;
+package protocol;
 
 import javax.websocket.*;
-import java.io.IOException;
-import java.io.Reader;
 
 /**
  * Created by yuriy on 08.07.2015.

@@ -1,13 +1,14 @@
-package model.commands;
+package protocol;
 
 /**
- * Created by ysidorov on 25.09.15.
+ * Created by yuriy on 08.07.2015.
  */
 public enum Command {
     OK,
     YOUR_MOVE,
     WAIT,
     HIGHLIGHT,
+    EXIT,
     PLAY_CARD,
     GAME_STARTED,
     GAME_ENDED,
@@ -20,4 +21,5 @@ public enum Command {
     DEAL_CARDS,
     DISCARD_CARDS,
     RESTORE_CARD
+    // PING, PONG
 }

@@ -8,15 +8,17 @@ public class Card {
     private String face;
     private String description;
     private CardType type;
+    private DeckType deckType;
     private boolean isHero = false;
     private boolean isHealer = false;
 
     public Card() {}
 
-    public Card(String face, CardType type, boolean isHero, boolean isHealer,
+    public Card(String face, CardType type, DeckType deckType, boolean isHero, boolean isHealer,
                 String description) {
         this.face = face;
         this.type = type;
+        this.deckType = deckType;
         this.isHero = isHero;
         this.isHealer = isHealer;
         this.description = description;
@@ -60,6 +62,14 @@ public class Card {
 
     public void setHealer(boolean isHealer) {
         this.isHealer = isHealer;
+    }
+
+    public DeckType getDeckType() {
+        return deckType;
+    }
+
+    public void setDeckType(DeckType deckType) {
+        this.deckType = deckType;
     }
 
     @Override

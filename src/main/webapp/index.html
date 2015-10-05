@@ -150,7 +150,7 @@
             opacity: 1;
         }
         .hero {
-            outline: 3px solid orangered;
+            outline: 2px solid orangered;
         }
         .highlighted-target {
             outline: 3px solid gold;
@@ -165,6 +165,7 @@
             document.body.onselectstart = function() { return false; };
             document.body.onmousedown = function() { return false; };
             addCardsFaces();
+            connect();
         };
         document.onmouseover = function(event) {
             if (isPlayingHorn) {
@@ -346,7 +347,8 @@
 
 
 
-        function clickOnCard(card) {
+        function clickOnCard(event) {
+            var card = event.currentTarget;
             // TODO: should be decided on the server side:
             // what to highlight or where to play
             // in the manner of 'highlight: id1, id2, id3'
@@ -484,7 +486,41 @@
         function getCardPartOfFaceUrl(card) {
             return card.getAttribute('face') + '.png';
         }
+        function askForCards() {
+            ws.send("DEAL_CARDS");
+        }
+        function connect() {
+            ws = new WebSocket("ws://localhost:8080/json");
+            ws.onmessage = onMessage;
+        }
+        function onMessage(msg) {
+            console.log(msg.data);
+            var response = JSON.parse(msg.data);
+            if(response.command === "DEAL_CARDS") {
+                if (Array.isArray(response.target)) {
+                    response.target.forEach(function(card) { processDealtCard(card); });
+                }
+            }
+        }
+        function processDealtCard(card) {
+            var div = document.createElement("div");
+            div.setAttribute("row", card.type);
+            div.setAttribute("description", card.description);
+            div.setAttribute("deck", card.deckType);
+            div.setAttribute("face", card.face);
 
+            if (card.hero) {
+                div.setAttribute("hero", "true");
+            }
+            if (card.healer) {
+                div.setAttribute("healer", "true");
+            }
+            div.classList.add("card");
+            div.addEventListener("dblclick", clickOnCard);
+            addFace(div);
+            document.getElementById("cards-to-play").appendChild(div);
+        }
+        var ws;
     </script>
 </head>
 <body style="margin: 2px;background-color: #101557;">
@@ -551,30 +587,10 @@
         <div class="row" id="your-hand" style="margin-top: 10px;text-align: center;">
             <div id="leader-container" style="width: 100px; height: 100%; float: left;">
                 <div description="foltest" row="LEADER" class="card" deck="NORTHERN" face="foltest_king"
-                     ondblclick="clickOnCard(this)"></div>
+                     ondblclick="clickOnCard()"></div>
             </div>
             <div id="cards-to-play">
-                <div description="close"     row="CLOSE"    hero="true"   class="card" deck="NORTHERN" face="roche"
-                     ondblclick="clickOnCard(this)"></div>
-                <div description="ranged"    row="RANGED"   class="card" deck="NORTHERN" face="keira"
-                     ondblclick="clickOnCard(this)"></div>
-                <div description="siege"     row="SIEGE"    class="card" deck="NORTHERN" face="catapult"
-                     ondblclick="clickOnCard(this)"></div>
-                <div description="horn"      row="HORN"     class="card" deck="NEUTRAL"  face="horn"
-                     ondblclick="clickOnCard(this)"></div>
-                <div description="weather"   row="WEATHER"  class="card" deck="NEUTRAL"  face="frost"
-                     ondblclick="clickOnCard(this)"></div>
-                <div description="weather"   row="WEATHER"  class="card" deck="NEUTRAL"  face="rain"
-                     ondblclick="clickOnCard(this)"></div>
-                <div description="weather"   row="WEATHER"  class="card" deck="NEUTRAL"  face="clear"
-                     ondblclick="clickOnCard(this)"></div>
-                <div description="decoy"   row="DECOY"  class="card" deck="NEUTRAL"  face="decoy"
-                     ondblclick="clickOnCard(this)"></div>
-                <div description="medic"   row="??"  class="card" deck="NORTHERN"  face="medic"
-                     ondblclick="clickOnCard(this)"></div>
 
-                <div description="close"   row="CLOSE"  class="card" deck="NORTHERN"  face="infantry"
-                     ondblclick="clickOnCard(this)"></div>
             </div>
         </div>
 
@@ -589,7 +605,7 @@
         </div>
 
         <div id="button" style="width: 200px; height: 100px; position: absolute; bottom: 25px; right: 25px;">
-            <button onclick="showHide(function(){alert('!');})">show modal</button>
+            <button onclick="askForCards();">ask for cards</button>
         </div>
 
     </div>

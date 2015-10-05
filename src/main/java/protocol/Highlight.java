@@ -1,7 +1,4 @@
-package model.commands;
-
-import model.HighlightTarget;
-import testing.*;
+package protocol;
 
 /**
  * Created by ysidorov on 25.09.15.

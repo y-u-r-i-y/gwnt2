@@ -1,9 +1,9 @@
 package model.commands;
 
-import model.HighlightTarget;
-import model.Response;
+import protocol.Command;
+import protocol.HighlightTarget;
+import protocol.Response;
 import model.json.BaseJsonMappingTest;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 
 /**

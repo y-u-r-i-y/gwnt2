@@ -13,6 +13,9 @@
             addCardsFaces();
             connect();
         };
+        window.onresize = function() {
+            compactCards(document.getElementById('cards-to-play'));
+        };
         document.onmouseover = function(event) {
             if (isPlayingHorn) {
                 return; // leave selected horn card face
@@ -261,6 +264,7 @@
             }, timeout);
         }
         function playCardSmoothly(card, field) {
+            card.style.marginLeft = "0px";
             card.classList.toggle('hidden');
             setTimeout(
                     function() {
@@ -333,7 +337,10 @@
             return card.getAttribute('face') + '.png';
         }
         function askForCards() {
-            ws.send("DEAL_CARDS");
+            ws.send(JSON.stringify({command: "DEAL_CARDS"}));
+        }
+        function askForHighlight(target) {
+            ws.send(JSON.stringify({command: "HIGHLIGHT", target: "HORN_TARGETS"}));
         }
         function connect() {
             ws = new WebSocket("ws://localhost:8080/json");
@@ -342,10 +349,16 @@
         function onMessage(msg) {
             console.log(msg.data);
             var response = JSON.parse(msg.data);
-            if(response.command === "DEAL_CARDS") {
-                if (Array.isArray(response.target)) {
-                    response.target.forEach(function(card) { processDealtCard(card); });
-                }
+            switch (response.command) {
+                case "DEAL_CARDS":
+                    if (Array.isArray(response.target)) {
+                        response.target.forEach(function(card) { processDealtCard(card); });
+                    }
+                    compactCards(document.getElementById('cards-to-play'));
+                    break;
+                case "HIGLIGHT":
+                        console.log(response.target);
+                    break;
             }
         }
         function processDealtCard(card) {
@@ -364,8 +377,28 @@
             div.classList.add("card");
             div.addEventListener("dblclick", clickOnCard);
             addFace(div);
-            document.getElementById("cards-to-play").appendChild(div);
+            var cardContainer = document.getElementById("cards-to-play");
+            cardContainer.appendChild(div);
+
         }
+        function compactCards(container) {
+            var cards = container.children;
+            var count = cards.length;
+            if (count < 3) {
+                return;
+            }
+            var cardWidth = cards[0].offsetWidth;
+            var containerWidth = container.clientWidth;
+            if (cardWidth * count <= containerWidth) {
+                return;
+            }
+            var marginDelta = (containerWidth - cardWidth * count) / (count - 2);
+            console.log(marginDelta);
+            for (var i = 1; i < cards.length; i++) {
+                cards[i].style.marginLeft = marginDelta + "px";
+            }
+        }
+
         var ws;
     </script>
 </head>
@@ -382,7 +415,13 @@
         <div id = "weather-target" class="center-div">
              <div id="card21" class="card" description="weather" row="WEATHER" deck="NEUTRAL" face="fog"></div>
         </div>
-        <div style="width:200px;height: 350px; position: absolute; bottom: 25px; left: 25px;"></div>
+        <div id="player-info" style="width:200px;height: 350px; position: absolute; bottom: 25px; left: 25px;">
+            <div id="leader-container" style="width: 100px; height: 100%; float: left;">
+                <div description="foltest" row="LEADER" class="card" deck="NORTHERN" face="foltest_king"
+                     ondblclick="clickOnCard()"></div>
+            </div>
+
+        </div>
     </div>
 
     <div id="middle">
@@ -431,10 +470,6 @@
         </span>
 
         <div class="row" id="your-hand" style="margin-top: 10px;text-align: center;">
-            <div id="leader-container" style="width: 100px; height: 100%; float: left;">
-                <div description="foltest" row="LEADER" class="card" deck="NORTHERN" face="foltest_king"
-                     ondblclick="clickOnCard()"></div>
-            </div>
             <div id="cards-to-play">
 
             </div>
@@ -450,8 +485,9 @@
             <div id="description-text" style="height: 40px;color: white;"></div>
         </div>
 
-        <div id="button" style="width: 200px; height: 100px; position: absolute; bottom: 25px; right: 25px;">
+        <div id="buttons" style="width: 200px; height: 100px; position: absolute; bottom: 25px; right: 25px;">
             <button onclick="askForCards();">ask for cards</button>
+            <button onclick="askForHighlight('HORN_TARGETS');">ask for hornTargets</button>
         </div>
 
     </div>

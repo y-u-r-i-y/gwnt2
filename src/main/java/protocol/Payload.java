@@ -3,13 +3,13 @@ package protocol;
 /**
  * Created by ysidorov on 25.09.15.
  */
-public class Response {
+public class Payload {
     public Command command;
     public Object target;
 
-    public Response() {}
+    public Payload() {}
 
-    public Response(Command command, Object target) {
+    public Payload(Command command, Object target) {
         this.command = command;
         this.target = target;
     }

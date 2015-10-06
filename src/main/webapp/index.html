@@ -204,7 +204,18 @@
 
             // https://css-tricks.com/almanac/selectors/a/attribute/
 
+            if (isPlayingHorn) {
+                cancelPlayingHorn(); // because a new horn card may be clicked
+            }
+            if (isPlayingDecoy && goodDecoyTarget(card)) {
+                playDecoy(card);
+                return;
+            }
 
+            ws.send(JSON.stringify({command: "PLAY_CARD", target: card.id}));
+
+
+            return;//////////////////////////////////////////////////////////////////////////////
 
             if (isPlayingHorn) {
                 cancelPlayingHorn(); // because a new horn card may be clicked
@@ -340,14 +351,14 @@
             ws.send(JSON.stringify({command: "DEAL_CARDS"}));
         }
         function askForHighlight(target) {
-            ws.send(JSON.stringify({command: "HIGHLIGHT", target: "HORN_TARGETS"}));
+            ws.send(JSON.stringify({command: "HIGHLIGHT", target: target}));
         }
         function connect() {
             ws = new WebSocket("ws://localhost:8080/json");
             ws.onmessage = onMessage;
         }
+        var currentCard = null;
         function onMessage(msg) {
-            console.log(msg.data);
             var response = JSON.parse(msg.data);
             switch (response.command) {
                 case "DEAL_CARDS":
@@ -359,10 +370,26 @@
                 case "HIGLIGHT":
                         console.log(response.target);
                     break;
+                case "UPDATE_ROW_SCORE":
+                    console.log(msg.data);
+                    // TODO: implement var row = document.getElementById(response.target);
+                    break;
+                case "SELECT_CARD":
+                    console.log(msg.data);
+                    currentCard = document.getElementById(response.target);
+                    break;
+                case "PLAY_CARD":
+                    console.log(msg.data);
+                    var where = document.querySelector("#" + response.target + ">.played-row");
+                    //if (typeof where !== 'undefined') {
+                    //if (typeof currentCard !== 'undefined') {
+                    playCardSmoothly(currentCard, where);
+                    break;
             }
         }
         function processDealtCard(card) {
             var div = document.createElement("div");
+            div.setAttribute("id", card.id);
             div.setAttribute("row", card.type);
             div.setAttribute("description", card.description);
             div.setAttribute("deck", card.deckType);
@@ -452,23 +479,23 @@
 
 
         <span class="your">
-        <div id="close-combat" class="row" >
+        <div id="CLOSE_COMBAT_ROW" class="row" >
             <div class="row-horn" onclick="playHorn(this)"></div>
             <div class="row-score-yours">123</div>
 
-            <div id="close-combat-row" class="played-row" ></div>
+            <div class="played-row" ></div>
         </div>
 
-        <div id="ranged-combat" class="row" >
+        <div id="RANGED_COMBAT_ROW" class="row" >
             <div class="row-horn" onclick="playHorn(this)"></div>
             <div class="row-score-yours">123</div>
-            <div id="ranged-combat-row" class="played-row" ></div>
+            <div class="played-row" ></div>
         </div>
 
-        <div id="siege-combat" class="row" >
+        <div id="SIEGE_COMBAT_ROW" class="row" >
             <div class="row-horn" onclick="playHorn(this)"></div>
             <div class="row-score-yours">123</div>
-            <div id="siege-combat-row" class="played-row" ></div>
+            <div class="played-row" ></div>
         </div>
         </span>
 
@@ -491,6 +518,13 @@
         <div id="buttons" style="width: 200px; height: 100px; position: absolute; bottom: 25px; right: 25px;">
             <button onclick="askForCards();">ask for cards</button>
             <button onclick="askForHighlight('HORN_TARGETS');">ask for hornTargets</button>
+            <button onclick="askForHighlight('CLOSE_COMBAT_ROW');">ask for combat row</button>
+            <button onclick="askForHighlight('RANGED_ROW');">ask for ranged row</button>
+            <button onclick="askForHighlight('SIEGE_ROW');">ask for siege row</button>
+            <button onclick="askForHighlight('WEATHER_TARGET');">ask for weather target</button>
+            <button onclick="askForHighlight('CARDS_BOND');">ask for cards bond</button>
+            <button onclick="askForHighlight('HAND');">ask for hand</button>
+            <button onclick="askForHighlight('DECOY_TARGET');">ask for decoy target</button>
         </div>
 
     </div>

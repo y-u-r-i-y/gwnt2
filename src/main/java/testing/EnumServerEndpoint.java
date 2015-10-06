@@ -1,8 +1,8 @@
 package testing;
 
 import protocol.Command;
-import protocol.CommandDecoder;
-import protocol.CommandEncoder;
+import protocol.PayloadDecoder;
+import protocol.PayloadEncoder;
 
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
@@ -10,8 +10,8 @@ import java.io.IOException;
 import java.util.logging.Logger;
 
 @ServerEndpoint(value = "/json-test",
-    encoders = {CommandEncoder.class},
-    decoders = {CommandDecoder.class}
+    encoders = {PayloadEncoder.class},
+    decoders = {PayloadDecoder.class}
 )
 public class EnumServerEndpoint {
 

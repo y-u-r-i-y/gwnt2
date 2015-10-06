@@ -11,17 +11,18 @@ public class Card {
     private DeckType deckType;
     private boolean isHero = false;
     private boolean isHealer = false;
-
+    private String id;
     public Card() {}
 
     public Card(String face, CardType type, DeckType deckType, boolean isHero, boolean isHealer,
-                String description) {
+                String description, String id) {
         this.face = face;
         this.type = type;
         this.deckType = deckType;
         this.isHero = isHero;
         this.isHealer = isHealer;
         this.description = description;
+        this.id = id;
     }
 
     public String getFace() {
@@ -72,6 +73,14 @@ public class Card {
         this.deckType = deckType;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
     @Override
     public String toString() {
         return "Card{" +
@@ -79,6 +88,7 @@ public class Card {
                 ", description='" + description + '\'' +
                 ", type=" + type +
                 ", isHero=" + isHero +
+                ", id=" + id +
                 '}';
     }
 }

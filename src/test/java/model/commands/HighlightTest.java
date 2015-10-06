@@ -2,7 +2,7 @@ package model.commands;
 
 import protocol.Command;
 import protocol.HighlightTarget;
-import protocol.Response;
+import protocol.Payload;
 import model.json.BaseJsonMappingTest;
 import org.junit.Test;
 
@@ -13,12 +13,12 @@ public class HighlightTest extends BaseJsonMappingTest {
 
     @Test
     public void testHighlightRow() throws Exception {
-        Response response = new Response(Command.HIGHLIGHT, HighlightTarget.HORN_TARGETS);
+        Payload payload = new Payload(Command.HIGHLIGHT, HighlightTarget.HORN_TARGETS);
 
-        String asString = toJson(response);
+        String asString = toJson(payload);
 
         System.out.println(
-                fromJson(asString, Response.class)
+                fromJson(asString, Payload.class)
         );
     }
 }

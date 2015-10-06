@@ -9,6 +9,7 @@ public enum Command {
     WAIT,
     HIGHLIGHT,
     EXIT,
+    SELECT_CARD,
     PLAY_CARD,
     GAME_STARTED,
     GAME_ENDED,

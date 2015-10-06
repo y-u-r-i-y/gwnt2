@@ -10,11 +10,11 @@
         window.onload = function() {
             document.body.onselectstart = function() { return false; };
             document.body.onmousedown = function() { return false; };
+            if (window.addEventListener) {
+                window.addEventListener("resize", onresize);
+            }
             addCardsFaces();
             connect();
-        };
-        window.onresize = function() {
-            compactCards(document.getElementById('cards-to-play'));
         };
         document.onmouseover = function(event) {
             if (isPlayingHorn) {
@@ -398,8 +398,11 @@
                 cards[i].style.marginLeft = marginDelta + "px";
             }
         }
+        function onresize() {
+             compactCards(document.getElementById('cards-to-play'));
+        }
 
-        var ws;
+            var ws;
     </script>
 </head>
 <body style="margin: 2px;background-color: #101557;">

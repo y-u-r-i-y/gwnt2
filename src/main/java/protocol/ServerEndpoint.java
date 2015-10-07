@@ -3,7 +3,6 @@ package protocol;
 import model.Card;
 import model.CardType;
 import model.Dealer;
-import model.DeckType;
 
 import javax.websocket.*;
 import java.io.IOException;
@@ -45,13 +44,16 @@ public class ServerEndpoint {
                         row = Row.CLOSE_COMBAT_ROW;
                         break;
                     case RANGED:
-                        row = Row.RANGED_ROW;
+                        row = Row.RANGED_COMBAT_ROW;
                         break;
                     case SIEGE:
-                        row = Row.SIEGE_ROW;
+                        row = Row.SIEGE_COMBAT_ROW;
                         break;
                     case DECOY:
-                        break;
+                        Dealer.rememberCard(dealtCard);
+                        response = new Payload(Command.HIGHLIGHT_CARDS, Dealer.getDecoyTargetsIds());
+                        sendResponse(session, response);
+                        return; //break;
                     case LEADER:
                         break;
                     case WEATHER:
@@ -66,16 +68,28 @@ public class ServerEndpoint {
 
                 response = new Payload(Command.PLAY_CARD, row);// send card's row
                 sendResponse(session, response);
-
+                Dealer.addPlayedCard(dealtCard);
                 response = new Payload(Command.UPDATE_ROW_SCORE, 42); // update card's row
                 sendResponse(session, response);
                 break;
+            case SWITCH_CARDS:
+/*
+                Card rememberedCard = Dealer.getRememberedCard();
+                String id1 = payload.target.toString();
+                String id2 = Dealer.getPlayedCard(id1).getId();
+                if (rememberedCard != null && playedCard != null) {
+                    response = new Payload(Command.SWITCH_CARDS, new Object[]{rememberedCard.getId(), id2}); //card id
 
+                    Dealer.clearRememberedCard();
+                }
+*/
+                break;
 
 
             case EXIT:
                 try {
                     session.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "Game ended"));
+                    Dealer.reset();
                     return;
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -91,6 +105,7 @@ public class ServerEndpoint {
 
     @OnClose
     public void onClose(Session session, CloseReason closeReason) {
+        Dealer.reset();
         logger.info(String.format("Session %s closed because of %s", session.getId(), closeReason));
     }
 }

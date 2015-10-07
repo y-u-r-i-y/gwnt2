@@ -5,6 +5,6 @@ package protocol;
  */
 public enum Row {
     CLOSE_COMBAT_ROW,
-    RANGED_ROW,
-    SIEGE_ROW
+    RANGED_COMBAT_ROW,
+    SIEGE_COMBAT_ROW
 }

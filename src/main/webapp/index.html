@@ -194,9 +194,22 @@
             debugger;
         }
 
-
-
         function clickOnCard(event) {
+            var card = event.currentTarget;
+
+            if (isPlayingHorn) {
+
+            } else
+            if (isPlayingDecoy) {
+                ws.send(JSON.stringify({command: "SWITCH_CARDS", target: [card.id, ]}));
+            } else {
+                // normal card
+                ws.send(JSON.stringify({command: "PLAY_CARD", target: card.id}));
+            }
+
+        }
+
+        function clickOnCard_OLD(event) {
             var card = event.currentTarget;
             // TODO: should be decided on the server side:
             // what to highlight or where to play
@@ -367,8 +380,20 @@
                     }
                     compactCards(document.getElementById('cards-to-play'));
                     break;
-                case "HIGLIGHT":
-                        console.log(response.target);
+                case "HIGHLIGHT_ROW":
+                        console.log(response);
+                    break;
+                case "HIGHLIGHT_CARDS":
+                        console.log(response);
+                        response.target.forEach(function(id){
+                            document.getElementById(id).classList.toggle('highlighted-target');
+                        });
+                    break;
+                case "HIGHLIGHT_HORN_TARGETS":
+                        console.log(response);
+                    break;
+                case "SWITCH_CARDS":
+                        console.log(response);
                     break;
                 case "UPDATE_ROW_SCORE":
                     console.log(msg.data);
@@ -381,9 +406,9 @@
                 case "PLAY_CARD":
                     console.log(msg.data);
                     var where = document.querySelector("#" + response.target + ">.played-row");
-                    //if (typeof where !== 'undefined') {
-                    //if (typeof currentCard !== 'undefined') {
-                    playCardSmoothly(currentCard, where);
+                    if (where && currentCard) {
+                        playCardSmoothly(currentCard, where);
+                    }
                     break;
             }
         }
@@ -519,8 +544,8 @@
             <button onclick="askForCards();">ask for cards</button>
             <button onclick="askForHighlight('HORN_TARGETS');">ask for hornTargets</button>
             <button onclick="askForHighlight('CLOSE_COMBAT_ROW');">ask for combat row</button>
-            <button onclick="askForHighlight('RANGED_ROW');">ask for ranged row</button>
-            <button onclick="askForHighlight('SIEGE_ROW');">ask for siege row</button>
+            <button onclick="askForHighlight('RANGED_COMBAT_ROW');">ask for ranged row</button>
+            <button onclick="askForHighlight('SIEGE_COMBAT_ROW');">ask for siege row</button>
             <button onclick="askForHighlight('WEATHER_TARGET');">ask for weather target</button>
             <button onclick="askForHighlight('CARDS_BOND');">ask for cards bond</button>
             <button onclick="askForHighlight('HAND');">ask for hand</button>

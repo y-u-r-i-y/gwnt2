@@ -8,6 +8,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class IdGenerator {
     public static AtomicInteger id = new AtomicInteger(0);
     public static String nextId() {
-        return String.format("C:%d", id.getAndDecrement());
+        return String.format("C:%d", id.getAndIncrement());
     }
 }

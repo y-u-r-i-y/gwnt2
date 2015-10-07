@@ -191,27 +191,17 @@
                 time = currentTime;
                 return false;
             }
-            debugger;
         }
 
         function clickOnCard(event) {
             var card = event.currentTarget;
-
-            if (isPlayingHorn) {
-
-            } else
-            if (isPlayingDecoy) {
-                ws.send(JSON.stringify({command: "SWITCH_CARDS", target: [card.id, ]}));
-            } else {
-                // normal card
-                ws.send(JSON.stringify({command: "PLAY_CARD", target: card.id}));
-            }
-
+            lastClickedCard = card;
+            ws.send(JSON.stringify({ command: "CARD_CLICKED", target: card.id }));
         }
 
         function clickOnCard_OLD(event) {
             var card = event.currentTarget;
-            // TODO: should be decided on the server side:
+            // TODO: remove after useful code is reused
             // what to highlight or where to play
             // in the manner of 'highlight: id1, id2, id3'
 
@@ -363,14 +353,11 @@
         function askForCards() {
             ws.send(JSON.stringify({command: "DEAL_CARDS"}));
         }
-        function askForHighlight(target) {
-            ws.send(JSON.stringify({command: "HIGHLIGHT", target: target}));
-        }
         function connect() {
             ws = new WebSocket("ws://localhost:8080/json");
             ws.onmessage = onMessage;
         }
-        var currentCard = null;
+        var lastClickedCard;
         function onMessage(msg) {
             var response = JSON.parse(msg.data);
             switch (response.command) {
@@ -381,34 +368,36 @@
                     compactCards(document.getElementById('cards-to-play'));
                     break;
                 case "HIGHLIGHT_ROW":
-                        console.log(response);
+                    console.log(response);
                     break;
-                case "HIGHLIGHT_CARDS":
-                        console.log(response);
-                        response.target.forEach(function(id){
-                            document.getElementById(id).classList.toggle('highlighted-target');
-                        });
+                case "TOGGLE_HIGHLIGHT_CARDS":
+                    console.log(response);
+                    response.target.forEach(function(id){
+                        document.getElementById(id).classList.toggle('highlighted-target');
+                    });
                     break;
                 case "HIGHLIGHT_HORN_TARGETS":
-                        console.log(response);
+                    console.log(response);
                     break;
                 case "SWITCH_CARDS":
-                        console.log(response);
+                    console.log(response);
+                    var fromCard = document.getElementById(response.target.from);
+                    var toCard = document.getElementById(response.target.to);
+                    switchCards(fromCard, toCard);
                     break;
                 case "UPDATE_ROW_SCORE":
-                    console.log(msg.data);
+                    console.log(response);
                     // TODO: implement var row = document.getElementById(response.target);
                     break;
-                case "SELECT_CARD":
-                    console.log(msg.data);
-                    currentCard = document.getElementById(response.target);
-                    break;
                 case "PLAY_CARD":
-                    console.log(msg.data);
+                    console.log(response);
                     var where = document.querySelector("#" + response.target + ">.played-row");
-                    if (where && currentCard) {
-                        playCardSmoothly(currentCard, where);
+                    if (where && lastClickedCard) {
+                        playCardSmoothly(lastClickedCard, where);
                     }
+                    break;
+                case "EVENT_IGNORED":
+                    console.log(response);
                     break;
             }
         }
@@ -473,7 +462,7 @@
         <div id="player-info" style="width:200px;height: 350px; position: absolute; bottom: 25px; left: 25px;">
             <div id="leader-container" style="width: 100px; height: 100%; float: left;">
                 <div description="foltest" row="LEADER" class="card" deck="NORTHERN" face="foltest_king"
-                     ondblclick="clickOnCard()"></div>
+                     ondblclick="clickOnCard(event)"></div>
             </div>
 
         </div>
@@ -481,17 +470,17 @@
 
     <div id="middle">
 
-        <div class="row" id="row1">
+        <div id="HIS_CLOSE_COMBAT_ROW" class="row" id="row1">
             <div class="row-score-his">123</div>
             <div class="row-horn"></div>
             <div></div>
         </div>
-        <div class="row" id="row2">
+        <div id="HIS_RANGED_COMBAT_ROW" class="row" id="row2">
             <div class="row-score-his">123</div>
             <div class="row-horn"></div>
             <div></div>
         </div>
-        <div class="row" id="row3">
+        <div id="HIS_SIEGE_COMBAT_ROW" class="row" id="row3">
             <div class="row-score-his">123</div>
             <div class="row-horn"></div>
             <div></div>
@@ -504,20 +493,20 @@
 
 
         <span class="your">
-        <div id="CLOSE_COMBAT_ROW" class="row" >
+        <div id="YOUR_CLOSE_COMBAT_ROW" class="row" >
             <div class="row-horn" onclick="playHorn(this)"></div>
             <div class="row-score-yours">123</div>
 
             <div class="played-row" ></div>
         </div>
 
-        <div id="RANGED_COMBAT_ROW" class="row" >
+        <div id="YOUR_RANGED_COMBAT_ROW" class="row" >
             <div class="row-horn" onclick="playHorn(this)"></div>
             <div class="row-score-yours">123</div>
             <div class="played-row" ></div>
         </div>
 
-        <div id="SIEGE_COMBAT_ROW" class="row" >
+        <div id="YOUR_SIEGE_COMBAT_ROW" class="row" >
             <div class="row-horn" onclick="playHorn(this)"></div>
             <div class="row-score-yours">123</div>
             <div class="played-row" ></div>
@@ -541,15 +530,7 @@
         </div>
 
         <div id="buttons" style="width: 200px; height: 100px; position: absolute; bottom: 25px; right: 25px;">
-            <button onclick="askForCards();">ask for cards</button>
-            <button onclick="askForHighlight('HORN_TARGETS');">ask for hornTargets</button>
-            <button onclick="askForHighlight('CLOSE_COMBAT_ROW');">ask for combat row</button>
-            <button onclick="askForHighlight('RANGED_COMBAT_ROW');">ask for ranged row</button>
-            <button onclick="askForHighlight('SIEGE_COMBAT_ROW');">ask for siege row</button>
-            <button onclick="askForHighlight('WEATHER_TARGET');">ask for weather target</button>
-            <button onclick="askForHighlight('CARDS_BOND');">ask for cards bond</button>
-            <button onclick="askForHighlight('HAND');">ask for hand</button>
-            <button onclick="askForHighlight('DECOY_TARGET');">ask for decoy target</button>
+            <button onclick="askForCards();">deal cards</button>
         </div>
 
     </div>

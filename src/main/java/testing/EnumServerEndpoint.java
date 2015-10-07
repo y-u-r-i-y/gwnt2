@@ -24,6 +24,7 @@ public class EnumServerEndpoint {
 
     // @OnMessage
     public void onMessage(Command command, Session session) throws IOException {
+/*
         switch (command) {
             case EXIT:
                 try {
@@ -34,6 +35,7 @@ public class EnumServerEndpoint {
                 }
 
         }
+*/
         logger.info("Received:" + command);
         session.getBasicRemote().sendText("Echo: " + command);
     }

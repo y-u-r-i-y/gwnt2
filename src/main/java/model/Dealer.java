@@ -9,9 +9,11 @@ import java.util.Map;
  * Created by ysidorov on 06.10.15.
  */
 public class Dealer {
+    // TODO: move from 'static' to singleton
     private static Map<String, Card> dealtCards = new HashMap<>();
     private static Map<String, Card> playedCards = new HashMap<>();
     private static Card rememberedCard = null;
+    private static boolean isPlayingDecoy = false; // TODO: store it here
     public static Card[] dealDefaults() {
         Card[] result = {
             new Card("geralt", CardType.CLOSE, DeckType.NEUTRAL, true, false, "Geralt", IdGenerator.nextId()),
@@ -39,8 +41,11 @@ public class Dealer {
     public static Card getPlayedCard(String cardId) {
         return playedCards.get(cardId);
     }
-    public static void addPlayedCard(Card card) {
+    public static void playCard(Card card) {
         playedCards.put(card.getId(), card);
+    }
+    public static void returnCardToHand(Card card) {
+        playedCards.remove(card.getId());
     }
     public static List<String> getDecoyTargetsIds() {
         List<String> result = new ArrayList<>();

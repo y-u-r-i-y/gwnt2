@@ -18,7 +18,7 @@ public enum Command {
     HIGHLIGHT_HORN_TARGETS,
 
     PLAY_CARD,
-    SELECT_CARD,
+    PLAY_WEATHER,
     SWITCH_CARDS,
     WEAKEN_CARDS,
     DEAL_CARDS,

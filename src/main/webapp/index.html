@@ -14,6 +14,15 @@
                 window.addEventListener("resize", onresize);
             }
             addCardsFaces();
+
+            // click handler for horn targets
+            var targets = document.querySelectorAll('.your .row-horn');
+            toArray(targets).forEach(
+                    function(hornTarget) {
+                        hornTarget.addEventListener("dblclick", clickOnHornTarget);
+                    }
+            );
+
             connect();
         };
         document.onmouseover = function(event) {
@@ -93,12 +102,11 @@
                 isPlayingHorn = false;
             }
         }
-        function playHorn(hornLocation) {
-            if (isPlayingHorn) {
-                playCardSmoothly(hornCard, hornLocation);
-                toggleHighlightHornTargets();
-                isPlayingHorn = false;
-            }
+        function clickOnHornTarget(hornLocation) {
+            debugger;
+            // ws.send(JSON.stringify({ command: "PLAY_HORN", target: card.id }));
+            // playCardSmoothly(hornCard, hornLocation);
+            // toggleHighlightHornTargets();
         }
 
         function toggleHighlightDecoyTargets () {
@@ -378,6 +386,17 @@
                     break;
                 case "HIGHLIGHT_HORN_TARGETS":
                     console.log(response);
+                    toggleHighlightHornTargets();
+                    break;
+                case "PLAY_HORN":
+                    console.log(response);
+                    //playCardSmoothly(hornCard, response.target);
+                    toggleHighlightHornTargets();
+                    break;
+                case "PLAY_WEATHER":
+                    console.log(response);
+                    var weatherTarget = document.getElementById("weather-target");
+                    playCardSmoothly(lastClickedCard, weatherTarget);
                     break;
                 case "SWITCH_CARDS":
                     console.log(response);
@@ -494,20 +513,20 @@
 
         <span class="your">
         <div id="YOUR_CLOSE_COMBAT_ROW" class="row" >
-            <div class="row-horn" onclick="playHorn(this)"></div>
+            <div class="row-horn" ></div>
             <div class="row-score-yours">123</div>
 
             <div class="played-row" ></div>
         </div>
 
         <div id="YOUR_RANGED_COMBAT_ROW" class="row" >
-            <div class="row-horn" onclick="playHorn(this)"></div>
+            <div class="row-horn" ></div>
             <div class="row-score-yours">123</div>
             <div class="played-row" ></div>
         </div>
 
         <div id="YOUR_SIEGE_COMBAT_ROW" class="row" >
-            <div class="row-horn" onclick="playHorn(this)"></div>
+            <div class="row-horn" ></div>
             <div class="row-score-yours">123</div>
             <div class="played-row" ></div>
         </div>

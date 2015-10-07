@@ -50,7 +50,7 @@ public class ServerEndpoint {
     private void dispatchMessage(Session session, String message) {}
 
     private void processHornTargetClicked(Session session, Row onRow) {
-
+        // TODO: sendResponse(session, new Payload(Command.PLAY_CARD, onRow));
     }
 
     boolean isPlayingDecoy = false;
@@ -108,6 +108,7 @@ public class ServerEndpoint {
             case LEADER:
                 break;
             case WEATHER:
+                response = new Payload(Command.PLAY_WEATHER, null);
                 break;
             case HORN:
                 response = new Payload(Command.HIGHLIGHT_HORN_TARGETS, null);

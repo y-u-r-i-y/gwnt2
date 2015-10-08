@@ -19,7 +19,9 @@
             var targets = document.querySelectorAll('.your .row-horn');
             toArray(targets).forEach(
                     function(hornTarget) {
-                        hornTarget.addEventListener("dblclick", clickOnHornTarget);
+                        //TODO: allow switching between singleclick and doubleclick
+                        // hornTarget.addEventListener("dblclick", clickOnHornTarget);
+                        hornTarget.addEventListener("click", clickOnHornTarget);
                     }
             );
 
@@ -359,7 +361,9 @@
                 div.setAttribute("healer", "true");
             }
             div.classList.add("card");
-            div.addEventListener("dblclick", clickOnCard);
+            //TODO: allow switching between singleclick and doubleclick
+            // div.addEventListener("dblclick", clickOnCard);
+            div.addEventListener("click", clickOnCard);
             addFace(div);
             var cardContainer = document.getElementById("cards-to-play");
             cardContainer.appendChild(div);

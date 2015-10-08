@@ -66,10 +66,11 @@ public class ServerEndpoint {
         }
 
         if (isPlayingHorn) {
-            sendResponse(session, new Payload(Command.PLAY_HORN, hornTarget));
-            sendResponse(session, new Payload(Command.TOGGLE_HIGHLIGHT_HORN_TARGETS, null));
             Dealer.playCard(Dealer.getRememberedCard());
             Dealer.clearRememberedCard();
+            isPlayingHorn = false;
+            sendResponse(session, new Payload(Command.PLAY_HORN, hornTarget));
+            sendResponse(session, new Payload(Command.TOGGLE_HIGHLIGHT_HORN_TARGETS, null));
         } else {
             sendResponse(session, new Payload(Command.EVENT_IGNORED, "not playing horn"));
         }
@@ -89,11 +90,12 @@ public class ServerEndpoint {
         if (isPlayingDecoy) {
             if (Dealer.getPlayedCard(cardId) == null) {
                 cancelPlayingDecoy(session); // clicked on another card in hand - stop playing decoy
-            } else if (isGoodDecoyTarget(card)) {
+            } else if (Dealer.isGoodDecoyTarget(card)) {
                 playDecoy(session, card);
                 return;
             } else {
                 sendResponse(session, new Payload(Command.EVENT_IGNORED, "bad decoy target: " + cardId));
+                return;
             }
         }
         if (isPlayingHorn) {
@@ -104,14 +106,17 @@ public class ServerEndpoint {
             case CLOSE:
                 row = Row.YOUR_CLOSE_COMBAT_ROW;
                 response = new Payload(Command.PLAY_CARD, row); // TODO: check if the card is a SPY
+                Dealer.playCard(card);
                 break;
             case RANGED:
                 row = Row.YOUR_RANGED_COMBAT_ROW;
                 response = new Payload(Command.PLAY_CARD, row);
+                Dealer.playCard(card);
                 break;
             case SIEGE:
                 row = Row.YOUR_SIEGE_COMBAT_ROW;
                 response = new Payload(Command.PLAY_CARD, row);
+                Dealer.playCard(card);
                 break;
             case DECOY:
                 // here isPlayingDecoy is always false ('true' case is processed earlier)
@@ -125,6 +130,7 @@ public class ServerEndpoint {
                 break;
             case WEATHER:
                 response = new Payload(Command.PLAY_WEATHER, null);
+                Dealer.playCard(card);
                 break;
             case HORN:
                 Dealer.rememberCard(card);
@@ -134,8 +140,8 @@ public class ServerEndpoint {
             default:
                 logger.log(Level.SEVERE, "unknown card type: " + type);
                 response = new Payload(Command.EVENT_IGNORED, "type");
+                Dealer.playCard(card);
         }
-        Dealer.playCard(card);
         sendResponse(session, response);
     }
 
@@ -162,8 +168,5 @@ public class ServerEndpoint {
         highlightedCards.clear();
         isPlayingDecoy = false;
         Dealer.clearRememberedCard();
-    }
-    private boolean isGoodDecoyTarget(Card card)  {
-        return ! (card.isHero() || card.getType().equals(CardType.WEATHER)) && Dealer.getPlayedCard(card.getId()) != null;
     }
 }

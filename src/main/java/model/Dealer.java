@@ -16,6 +16,10 @@ public class Dealer {
     private static boolean isPlayingDecoy = false; // TODO: store it here
     public static Card[] dealDefaults() {
         Card[] result = {
+
+                // TODO: add SPECIAL attribute ?
+
+
             new Card("geralt", CardType.CLOSE, DeckType.NEUTRAL, true, false, "Geralt", IdGenerator.nextId()),
             new Card("roche", CardType.CLOSE, DeckType.NORTHERN, true, false, "Roche", IdGenerator.nextId()),
             new Card("keira", CardType.RANGED, DeckType.NORTHERN, false, false, "", IdGenerator.nextId()),
@@ -76,4 +80,15 @@ public class Dealer {
     public static Card getRememberedCard() {
         return rememberedCard;
     }
+    public static boolean isCardPlayed(Card card) {
+        return Dealer.getPlayedCard(card.getId()) != null;
+    }
+    public static boolean isGoodDecoyTarget(Card card)  {
+        return isCardPlayed(card) &&
+                ! (card.isHero()
+                        || CardType.WEATHER.equals(card.getType())
+                        || CardType.LEADER.equals(card.getType())
+                        || CardType.HORN.equals(card.getType()));
+    }
+
 }

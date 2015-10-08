@@ -26,9 +26,6 @@
             connect();
         };
         document.onmouseover = function(event) {
-            if (isPlayingHorn) {
-                return; // leave selected horn card face
-            }
             var element = event.target;
             // set description
             if (element.hasAttribute("description")) {
@@ -75,12 +72,6 @@
             return a;
         }
 
-        var isPlayingHorn = false; // TODO: make scoped
-        var hornCard; // TODO: make scoped
-
-        var isPlayingDecoy = false; // TODO: make scoped
-        var decoyCard; // TODO: make scoped
-
         function toggleHighlightHornTargets () {
             // https://developer.mozilla.org/ru/docs/Web/API/NodeList
             var targets = document.querySelectorAll('.your .row-horn');
@@ -91,20 +82,9 @@
             );
 
         }
-        function prepareToPlayHorn (card) {
-            toggleHighlightHornTargets();
-            isPlayingHorn = true;
-            hornCard = card;
-        }
-        function cancelPlayingHorn () {
-            if (isPlayingHorn) {
-                toggleHighlightHornTargets();
-                isPlayingHorn = false;
-            }
-        }
-        function clickOnHornTarget(hornLocation) {
-            debugger;
-            // ws.send(JSON.stringify({ command: "PLAY_HORN", target: card.id }));
+
+        function clickOnHornTarget(event) {
+            ws.send(JSON.stringify({ command: "HORN_TARGET_CLICKED", target: event.currentTarget.id }));
             // playCardSmoothly(hornCard, hornLocation);
             // toggleHighlightHornTargets();
         }
@@ -118,26 +98,6 @@
                     }
             );
 
-        }
-        function prepareToPlayDecoy (card) {
-            toggleHighlightDecoyTargets();
-            isPlayingDecoy = true;
-            decoyCard = card;
-        }
-        function cancelPlayingDecoy () {
-            if (isPlayingDecoy) {
-                toggleHighlightHornTargets();
-                isPlayingDecoy = false;
-            }
-        }
-        function playDecoy(target) {
-            if (isPlayingDecoy) {
-
-                switchCards(decoyCard, target);
-                //playCardSmoothly(decoyCard, target);
-                toggleHighlightDecoyTargets();
-                isPlayingDecoy = false;
-            }
         }
         function switchCards(obj1, obj2) {
             obj1.classList.toggle('hidden');
@@ -163,42 +123,6 @@
                                     obj2.classList.toggle('hidden');
                                 }, 200);
                     }, 400);
-        }
-
-
-
-        var time = 0;
-        function singleClickOnCard (card) {
-            // http://stackoverflow.com/questions/5497073/how-to-differentiate-single-click-event-and-double-click-event
-            // https://gist.github.com/karbassi/639453
-            // http://stackoverflow.com/questions/10211145/getting-current-date-and-time-in-javascript
-
-            // !!!!!!! http://stackoverflow.com/questions/2024198/how-many-seconds-between-two-dates
-
-            // card.classList.toggle('highlighted');
-
-            var currentTime = new Date();
-            console.log(((currentTime - time) / 1000));
-            if (((currentTime - time) / 1000)  > .5) {
-                console.log(" single clicked, delta: " + (currentTime - time) / 1000);
-            } else {
-                console.log("double clicked. ignored.")
-            }
-            time = currentTime;
-        }
-        function isSingleClick() {
-            var currentTime = new Date();
-            var delta = currentTime - time;
-            console.log(((delta) / 1000));
-            if ((delta / 1000)  > .5) {
-                console.log(" single clicked, delta: " + delta / 1000);
-                time = currentTime;
-                return true;
-            } else {
-                console.log("double clicked. ignored.");
-                time = currentTime;
-                return false;
-            }
         }
 
         function clickOnCard(event) {
@@ -384,14 +308,14 @@
                         document.getElementById(id).classList.toggle('highlighted-target');
                     });
                     break;
-                case "HIGHLIGHT_HORN_TARGETS":
+                case "TOGGLE_HIGHLIGHT_HORN_TARGETS":
                     console.log(response);
                     toggleHighlightHornTargets();
                     break;
                 case "PLAY_HORN":
                     console.log(response);
-                    //playCardSmoothly(hornCard, response.target);
-                    toggleHighlightHornTargets();
+                    var hornTarget = document.getElementById(response.target);
+                    playCardSmoothly(lastClickedCard, hornTarget);
                     break;
                 case "PLAY_WEATHER":
                     console.log(response);
@@ -513,20 +437,20 @@
 
         <span class="your">
         <div id="YOUR_CLOSE_COMBAT_ROW" class="row" >
-            <div class="row-horn" ></div>
+            <div id="CLOSE_COMBAT_HORN" class="row-horn" ></div>
             <div class="row-score-yours">123</div>
 
             <div class="played-row" ></div>
         </div>
 
         <div id="YOUR_RANGED_COMBAT_ROW" class="row" >
-            <div class="row-horn" ></div>
+            <div id="RANGED_COMBAT_HORN" class="row-horn" ></div>
             <div class="row-score-yours">123</div>
             <div class="played-row" ></div>
         </div>
 
         <div id="YOUR_SIEGE_COMBAT_ROW" class="row" >
-            <div class="row-horn" ></div>
+            <div id="SIEGE_COMBAT_HORN" class="row-horn" ></div>
             <div class="row-score-yours">123</div>
             <div class="played-row" ></div>
         </div>

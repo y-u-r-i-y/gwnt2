@@ -6,6 +6,7 @@ import model.Dealer;
 
 import javax.websocket.*;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,7 +22,11 @@ public class ServerEndpoint {
     public void onOpen(Session session) {
         logger.info("Connected ... " + session.getId());
     }
-
+    @OnClose
+    public void onClose(Session session, CloseReason closeReason) {
+        Dealer.reset();
+        logger.info(String.format("Session %s closed because of %s", session.getId(), closeReason));
+    }
     @OnMessage
     public void onMessage(Payload payload, Session session) throws IOException, EncodeException {
         Payload response;
@@ -30,7 +35,10 @@ public class ServerEndpoint {
                 processCardClicked(session, (String) payload.target);
                 break;
             case HORN_TARGET_CLICKED:
-                processHornTargetClicked(session, (Row) payload.target);
+                processHornTargetClicked(session, payload.target.toString());
+                break;
+            case CANCEL:
+
                 break;
             case MESSAGE_SENT:
                 dispatchMessage(session, (String) payload.target);
@@ -44,44 +52,52 @@ public class ServerEndpoint {
                 sendResponse(session, response);
                 break;
         }
-        //////////////////////////////
     }
 
     private void dispatchMessage(Session session, String message) {}
 
-    private void processHornTargetClicked(Session session, Row onRow) {
-        // TODO: sendResponse(session, new Payload(Command.PLAY_CARD, onRow));
+    private boolean isPlayingHorn = false;
+    private void processHornTargetClicked(Session session, String targetId) throws IOException, EncodeException {
+        HornTarget hornTarget = null;
+        try {
+            hornTarget = HornTarget.valueOf(targetId);
+        } catch (IllegalArgumentException e) {
+            sendResponse(session, new Payload(Command.EVENT_IGNORED, "bad horn target"));
+        }
+
+        if (isPlayingHorn) {
+            sendResponse(session, new Payload(Command.PLAY_HORN, hornTarget));
+            sendResponse(session, new Payload(Command.TOGGLE_HIGHLIGHT_HORN_TARGETS, null));
+            Dealer.playCard(Dealer.getRememberedCard());
+            Dealer.clearRememberedCard();
+        } else {
+            sendResponse(session, new Payload(Command.EVENT_IGNORED, "not playing horn"));
+        }
     }
 
-    boolean isPlayingDecoy = false;
-    List<String> highlightedCards;
+    private boolean isPlayingDecoy = false;
+    private List<String> highlightedCards = new ArrayList<>();
     private void processCardClicked(Session session, String cardId) throws IOException, EncodeException {
         Card card = Dealer.getDealtCard(cardId); // ensure there's such a card
         if (card == null) {
             sendResponse(session, new Payload(Command.EVENT_IGNORED, "no such card: " + cardId));
             return;
         }
-
         Row row = null;
         Payload response = null;
 
         if (isPlayingDecoy) {
-            Card decoy = Dealer.getRememberedCard();
-
-            if (card.isHero()) {
-                // TODO: ensure good decoy target, check other cases
-                sendResponse(session, new Payload(Command.EVENT_IGNORED, "bad decoy target: " + cardId));
+            if (Dealer.getPlayedCard(cardId) == null) {
+                cancelPlayingDecoy(session); // clicked on another card in hand - stop playing decoy
+            } else if (isGoodDecoyTarget(card)) {
+                playDecoy(session, card);
                 return;
+            } else {
+                sendResponse(session, new Payload(Command.EVENT_IGNORED, "bad decoy target: " + cardId));
             }
-
-            Dealer.playCard(decoy);
-            Dealer.returnCardToHand(card);
-            sendResponse(session, new Payload(Command.SWITCH_CARDS, new SwitchPair(decoy.getId(), card.getId())));
-            sendResponse(session, new Payload(Command.TOGGLE_HIGHLIGHT_CARDS, highlightedCards)); // remove highlight
-            Dealer.clearRememberedCard();
-            highlightedCards = null;
-            isPlayingDecoy = false;
-            return;
+        }
+        if (isPlayingHorn) {
+            cancelPlayingHorn(session);
         }
         CardType type = card.getType();
         switch (type) {
@@ -111,7 +127,9 @@ public class ServerEndpoint {
                 response = new Payload(Command.PLAY_WEATHER, null);
                 break;
             case HORN:
-                response = new Payload(Command.HIGHLIGHT_HORN_TARGETS, null);
+                Dealer.rememberCard(card);
+                response = new Payload(Command.TOGGLE_HIGHLIGHT_HORN_TARGETS, null);
+                isPlayingHorn = true;
                 break;
             default:
                 logger.log(Level.SEVERE, "unknown card type: " + type);
@@ -121,13 +139,31 @@ public class ServerEndpoint {
         sendResponse(session, response);
     }
 
-    private void sendResponse(Session session, Payload response) throws IOException, EncodeException {
+    private void playDecoy(Session session, Card card) throws IOException, EncodeException {
+        Card decoy = Dealer.getRememberedCard();
+        Dealer.playCard(decoy);
+        Dealer.returnCardToHand(card);
+        sendResponse(session, new Payload(Command.SWITCH_CARDS, new SwitchPair(decoy.getId(), card.getId())));
+        sendResponse(session, new Payload(Command.TOGGLE_HIGHLIGHT_CARDS, highlightedCards)); // remove highlight
+        Dealer.clearRememberedCard();
+        highlightedCards.clear();
+        isPlayingDecoy = false;
+    }
+     private void sendResponse(Session session, Payload response) throws IOException, EncodeException {
         session.getBasicRemote().sendObject(response);
     }
-
-    @OnClose
-    public void onClose(Session session, CloseReason closeReason) {
-        Dealer.reset();
-        logger.info(String.format("Session %s closed because of %s", session.getId(), closeReason));
+     private void cancelPlayingHorn(Session session) throws IOException, EncodeException {
+        sendResponse(session, new Payload(Command.TOGGLE_HIGHLIGHT_HORN_TARGETS, null));
+        isPlayingHorn = false;
+        Dealer.clearRememberedCard();
+    }
+    private void cancelPlayingDecoy(Session session) throws IOException, EncodeException {
+        sendResponse(session, new Payload(Command.TOGGLE_HIGHLIGHT_CARDS, highlightedCards)); // remove highlight
+        highlightedCards.clear();
+        isPlayingDecoy = false;
+        Dealer.clearRememberedCard();
+    }
+    private boolean isGoodDecoyTarget(Card card)  {
+        return ! (card.isHero() || card.getType().equals(CardType.WEATHER)) && Dealer.getPlayedCard(card.getId()) != null;
     }
 }

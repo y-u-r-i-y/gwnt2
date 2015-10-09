@@ -20,17 +20,18 @@ public class Dealer {
                 // TODO: add SPECIAL attribute ?
 
 
-            new Card("geralt", CardType.CLOSE, DeckType.NEUTRAL, true, false, "Geralt", IdGenerator.nextId()),
-            new Card("roche", CardType.CLOSE, DeckType.NORTHERN, true, false, "Roche", IdGenerator.nextId()),
-            new Card("keira", CardType.RANGED, DeckType.NORTHERN, false, false, "", IdGenerator.nextId()),
-            new Card("catapult", CardType.SIEGE, DeckType.NORTHERN, false, false, "", IdGenerator.nextId()),
-            new Card("horn", CardType.HORN, DeckType.NEUTRAL, false, false, "", IdGenerator.nextId()),
-            new Card("frost", CardType.WEATHER, DeckType.NEUTRAL, false, false, "", IdGenerator.nextId()),
-            new Card("rain", CardType.WEATHER, DeckType.NEUTRAL, false, false, "", IdGenerator.nextId()),
-            new Card("clear", CardType.WEATHER, DeckType.NEUTRAL, false, false, "", IdGenerator.nextId()),
-            new Card("decoy", CardType.DECOY, DeckType.NEUTRAL, false, false, "", IdGenerator.nextId()),
-            new Card("medic", CardType.SIEGE, DeckType.NORTHERN, false, true, "", IdGenerator.nextId()),
-            new Card("infantry", CardType.CLOSE, DeckType.NORTHERN, false, false, "poor f. infantry", IdGenerator.nextId()),
+            new Card("geralt", CardType.CLOSE, DeckType.NEUTRAL, true, false, false, "Geralt", IdGenerator.nextId()),
+            new Card("roche", CardType.CLOSE, DeckType.NORTHERN, true, false, false, "Roche", IdGenerator.nextId()),
+            new Card("dijkstra", CardType.CLOSE, DeckType.NORTHERN, false, false, true, "Spy", IdGenerator.nextId()),
+            new Card("keira", CardType.RANGED, DeckType.NORTHERN, false, false, false, "", IdGenerator.nextId()),
+            new Card("catapult", CardType.SIEGE, DeckType.NORTHERN, false, false, false, "", IdGenerator.nextId()),
+            new Card("horn", CardType.HORN, DeckType.NEUTRAL, false, false, false, "", IdGenerator.nextId()),
+            new Card("frost", CardType.WEATHER, DeckType.NEUTRAL, false, false, false, "", IdGenerator.nextId()),
+            new Card("rain", CardType.WEATHER, DeckType.NEUTRAL, false, false, false, "", IdGenerator.nextId()),
+            new Card("clear", CardType.WEATHER, DeckType.NEUTRAL, false, false, false, "", IdGenerator.nextId()),
+            new Card("decoy", CardType.DECOY, DeckType.NEUTRAL, false, false, false, "", IdGenerator.nextId()),
+            new Card("medic", CardType.SIEGE, DeckType.NORTHERN, false, true, false, "", IdGenerator.nextId()),
+            new Card("infantry", CardType.CLOSE, DeckType.NORTHERN, false, false, false, "poor f. infantry", IdGenerator.nextId()),
         };
 
         for (Card card : result) {
@@ -38,6 +39,16 @@ public class Dealer {
         }
         return result;
     }
+    public static Card[] dealCards(int count) {
+        Card[] result = new Card[count];
+        for (int i = 0; i < count; i++) {
+            Card c = new Card("infantry", CardType.CLOSE, DeckType.NORTHERN, false, false, false, "poor f. infantry", IdGenerator.nextId());
+            result[i] = c;
+            dealtCards.put(c.getId(), c);
+        }
+        return result;
+    }
+
 
     public static Card getDealtCard(String cardId) {
         return dealtCards.get(cardId);

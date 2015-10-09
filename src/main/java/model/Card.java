@@ -11,16 +11,18 @@ public class Card {
     private DeckType deckType;
     private boolean isHero = false;
     private boolean isHealer = false;
+    private boolean isSpy = false;
     private String id;
     public Card() {}
 
-    public Card(String face, CardType type, DeckType deckType, boolean isHero, boolean isHealer,
+    public Card(String face, CardType type, DeckType deckType, boolean isHero, boolean isHealer, boolean isSpy,
                 String description, String id) {
         this.face = face;
         this.type = type;
         this.deckType = deckType;
         this.isHero = isHero;
         this.isHealer = isHealer;
+        this.isSpy = isSpy;
         this.description = description;
         this.id = id;
     }
@@ -79,6 +81,14 @@ public class Card {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public boolean isSpy() {
+        return isSpy;
+    }
+
+    public void setSpy(boolean isSpy) {
+        this.isSpy = isSpy;
     }
 
     @Override

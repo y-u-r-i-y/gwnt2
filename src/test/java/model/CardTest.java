@@ -13,7 +13,7 @@ public class CardTest extends BaseJsonMappingTest{
 
     @Test
     public void testSimpleCardSerialize() throws IOException {
-        Card c = new Card("Geralt", CardType.CLOSE, DeckType.NEUTRAL, true, false, "the grey one", "1");
+        Card c = new Card("Geralt", CardType.CLOSE, DeckType.NEUTRAL, true, false, false, "the grey one", "1");
         c.setHero(true);
 
         String asString = toJson(c);
@@ -28,7 +28,7 @@ public class CardTest extends BaseJsonMappingTest{
     }
     @Test
     public void testSimpleCardDeSerializeBothWays() throws IOException {
-        Card c = new Card("Geralt", CardType.CLOSE, DeckType.NEUTRAL, true, false, "the grey one", "1");
+        Card c = new Card("Geralt", CardType.CLOSE, DeckType.NEUTRAL, true, false, false, "the grey one", "1");
 
         String asString = toJson(c);
 

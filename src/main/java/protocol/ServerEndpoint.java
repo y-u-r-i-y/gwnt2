@@ -78,6 +78,7 @@ public class ServerEndpoint {
 
     private boolean isPlayingDecoy = false;
     private List<String> highlightedCards = new ArrayList<>();
+
     private void processCardClicked(Session session, String cardId) throws IOException, EncodeException {
         Card card = Dealer.getDealtCard(cardId); // ensure there's such a card
         if (card == null) {
@@ -88,13 +89,18 @@ public class ServerEndpoint {
         Payload response = null;
 
         if (isPlayingDecoy) {
-            if (Dealer.getPlayedCard(cardId) == null) {
+            if (! Dealer.isCardPlayed(card)) {
                 cancelPlayingDecoy(session); // clicked on another card in hand - stop playing decoy
             } else if (Dealer.isGoodDecoyTarget(card)) {
                 playDecoy(session, card);
                 return;
             } else {
                 sendResponse(session, new Payload(Command.EVENT_IGNORED, "bad decoy target: " + cardId));
+                return;
+            }
+        } else {
+            if (Dealer.isCardPlayed(card)) {
+                sendResponse(session, new Payload(Command.EVENT_IGNORED, "card is already played: " + cardId));
                 return;
             }
         }
@@ -104,18 +110,15 @@ public class ServerEndpoint {
         CardType type = card.getType();
         switch (type) {
             case CLOSE:
-                row = Row.YOUR_CLOSE_COMBAT_ROW;
-                response = new Payload(Command.PLAY_CARD, row); // TODO: check if the card is a SPY
+                response = new Payload(Command.PLAY_CARD, getCardRow(card));
                 Dealer.playCard(card);
                 break;
             case RANGED:
-                row = Row.YOUR_RANGED_COMBAT_ROW;
-                response = new Payload(Command.PLAY_CARD, row);
+                response = new Payload(Command.PLAY_CARD, getCardRow(card));
                 Dealer.playCard(card);
                 break;
             case SIEGE:
-                row = Row.YOUR_SIEGE_COMBAT_ROW;
-                response = new Payload(Command.PLAY_CARD, row);
+                response = new Payload(Command.PLAY_CARD, getCardRow(card));
                 Dealer.playCard(card);
                 break;
             case DECOY:
@@ -143,6 +146,9 @@ public class ServerEndpoint {
                 Dealer.playCard(card);
         }
         sendResponse(session, response);
+        if (card.isSpy()) {
+            sendResponse(session, new Payload(Command.DEAL_CARDS, Dealer.dealCards(2)));
+        }
     }
 
     private void playDecoy(Session session, Card card) throws IOException, EncodeException {
@@ -168,5 +174,17 @@ public class ServerEndpoint {
         highlightedCards.clear();
         isPlayingDecoy = false;
         Dealer.clearRememberedCard();
+    }
+    private Row getCardRow(Card c) {
+        CardType type = c.getType();
+        switch (type) {
+            case CLOSE:
+                return c.isSpy() ? Row.HIS_CLOSE_COMBAT_ROW : Row.YOUR_CLOSE_COMBAT_ROW;
+            case RANGED:
+                return c.isSpy() ? Row.HIS_RANGED_COMBAT_ROW: Row.YOUR_RANGED_COMBAT_ROW;
+            case SIEGE:
+                return c.isSpy() ? Row.HIS_SIEGE_COMBAT_ROW: Row.YOUR_SIEGE_COMBAT_ROW;
+            }
+        return null; // TODO: consider adding enum for this
     }
 }

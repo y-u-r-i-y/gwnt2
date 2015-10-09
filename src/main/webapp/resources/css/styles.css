@@ -56,6 +56,7 @@ div {
     width: 100px;
     height: 100%;
     float: left;
+    display: inline-block;
     text-align: center;
     background-image: url("/resources/horn-bkgrnd.jpg");
     background-size: 100%;
@@ -63,6 +64,12 @@ div {
     transition: outline .5s linear;
     /*box-shadow: inset 2px -2px 5px 8px rgba(240,188,56,1);*/
 }
+.played-row {
+    text-align:center;
+    margin-left: 100px;
+    background-color: black;
+}
+
 .your {}
 .divider {
     height: 20px;
@@ -121,9 +128,6 @@ div {
 }
 #weather-target > div {
     margin: 3px;
-}
-.played-row {
-    text-align:center;
 }
 .modal {
     position: absolute;

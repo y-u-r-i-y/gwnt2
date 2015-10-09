@@ -118,7 +118,9 @@
 
                         // remove temporary marker node
                         temp.parentNode.removeChild(temp);
-
+                        var m = obj1.style.marginLeft;
+                        obj1.style.marginLeft = obj2.style.marginLeft;
+                        obj2.style.marginLeft = m;
                         setTimeout(
                                 function() {
                                     obj1.classList.toggle('hidden');
@@ -212,11 +214,12 @@
             }, timeout);
         }
         function playCardSmoothly(card, field) {
-            card.style.marginLeft = "0px";
             card.classList.toggle('hidden');
             setTimeout(
                     function() {
                         field.appendChild(card);
+                        card.style.marginLeft = "0px";
+                        compactCards(field);
                         setTimeout(
                                 function() {
                                     card.classList.toggle('hidden');
@@ -228,28 +231,6 @@
                                     }
                                 }, 200);
                     }, 400);
-        }
-        function showHide(doBetweenTransitions) {
-            var play_back = ! document.getElementById('modal').classList.contains('visible');
-            document.getElementById('modal').classList.toggle('visible');
-            if (play_back) {
-                setTimeout(
-                    function() {
-                        if (typeof doBetweenTransitions === 'function') {
-                            /*doBetweenTransitions();*/
-                        }
-                        showHide();
-                    }, 1000);
-            }
-        }
-        function goodDecoyTarget(card) {
-            // TODO: should be decided on the server side
-            return card != decoyCard && !card.hasAttribute('hero')
-                    && card.getAttribute('row') != 'HORN'
-                    && card.parentNode.id != 'cards-to-play';
-        }
-        function flushElement(e) {
-            alert("not implemented");
         }
         function clearDescription() {
             var bc = document.getElementById('big-card');
@@ -299,7 +280,7 @@
                     if (Array.isArray(response.target)) {
                         response.target.forEach(function(card) { processDealtCard(card); });
                     }
-                    compactCards(document.getElementById('cards-to-play'));
+                    compactHand();
                     break;
                 case "HIGHLIGHT_ROW":
                     console.log(response);
@@ -339,12 +320,16 @@
                     var where = document.querySelector("#" + response.target + ">.played-row");
                     if (where && lastClickedCard) {
                         playCardSmoothly(lastClickedCard, where);
+                        compactHand();
                     }
                     break;
                 case "EVENT_IGNORED":
                     console.log(response);
                     break;
             }
+        }
+        function compactHand() {
+            compactCards(document.getElementById('cards-to-play'));
         }
         function processDealtCard(card) {
             var div = document.createElement("div");
@@ -377,17 +362,20 @@
             }
             var cardWidth = cards[0].offsetWidth;
             var containerWidth = container.clientWidth;
-            if (cardWidth * count <= containerWidth) {
+
+            var marginDelta = (containerWidth - 63 - cardWidth * count) / count;
+            if (marginDelta > 1) {
                 return;
             }
-            var marginDelta = (containerWidth - cardWidth * count) / (count - 2);
+
             console.log(marginDelta);
             for (var i = 1; i < cards.length; i++) {
                 cards[i].style.marginLeft = marginDelta + "px";
             }
         }
         function onresize() {
-             compactCards(document.getElementById('cards-to-play'));
+             compactHand();
+            // TODO: compact rows as well
         }
 
             var ws;
@@ -417,20 +405,20 @@
 
     <div id="middle">
 
-        <div id="HIS_CLOSE_COMBAT_ROW" class="row" id="row1">
+        <div id="HIS_SIEGE_COMBAT_ROW" class="row">
             <div class="row-score-his">123</div>
             <div class="row-horn"></div>
-            <div></div>
+            <div class="played-row"></div>
         </div>
-        <div id="HIS_RANGED_COMBAT_ROW" class="row" id="row2">
+        <div id="HIS_RANGED_COMBAT_ROW" class="row">
             <div class="row-score-his">123</div>
             <div class="row-horn"></div>
-            <div></div>
+            <div class="played-row"></div>
         </div>
-        <div id="HIS_SIEGE_COMBAT_ROW" class="row" id="row3">
+        <div id="HIS_CLOSE_COMBAT_ROW" class="row">
             <div class="row-score-his">123</div>
             <div class="row-horn"></div>
-            <div></div>
+            <div class="played-row"></div>
         </div>
 
 
@@ -441,22 +429,22 @@
 
         <span class="your">
         <div id="YOUR_CLOSE_COMBAT_ROW" class="row" >
-            <div id="CLOSE_COMBAT_HORN" class="row-horn" ></div>
-            <div class="row-score-yours">123</div>
-
-            <div class="played-row" ></div>
+            <div id="CLOSE_COMBAT_HORN" class="row-horn">
+                <div class="row-score-yours">123</div>
+            </div>
+            <div class="played-row"></div>
         </div>
 
         <div id="YOUR_RANGED_COMBAT_ROW" class="row" >
-            <div id="RANGED_COMBAT_HORN" class="row-horn" ></div>
             <div class="row-score-yours">123</div>
-            <div class="played-row" ></div>
+            <div id="RANGED_COMBAT_HORN" class="row-horn" ></div>
+            <div class="played-row"></div>
         </div>
 
         <div id="YOUR_SIEGE_COMBAT_ROW" class="row" >
-            <div id="SIEGE_COMBAT_HORN" class="row-horn" ></div>
             <div class="row-score-yours">123</div>
-            <div class="played-row" ></div>
+            <div id="SIEGE_COMBAT_HORN" class="row-horn" ></div>
+            <div class="played-row"></div>
         </div>
         </span>
 

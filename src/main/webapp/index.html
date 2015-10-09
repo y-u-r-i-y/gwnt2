@@ -220,6 +220,7 @@
                         field.appendChild(card);
                         card.style.marginLeft = "0px";
                         compactCards(field);
+                        compactHand();
                         setTimeout(
                                 function() {
                                     card.classList.toggle('hidden');
@@ -232,6 +233,20 @@
                                 }, 200);
                     }, 400);
         }
+        function dealCardSmoothly(card) {
+            card.classList.toggle('hidden');
+            var hand = document.getElementById("hand");
+            setTimeout(
+                    function() {
+                        hand.appendChild(card);
+                        compactHand();
+                        setTimeout(
+                                function() {
+                                    card.classList.toggle('hidden');
+                                }, 200);
+                    }, 400);
+        }
+
         function clearDescription() {
             var bc = document.getElementById('big-card');
             bc.style.backgroundImage = '';
@@ -277,9 +292,17 @@
             var response = JSON.parse(msg.data);
             switch (response.command) {
                 case "DEAL_CARDS":
-                    if (Array.isArray(response.target)) {
-                        response.target.forEach(function(card) { processDealtCard(card); });
-                    }
+                    response.target.forEach(function(card) {
+                        var cardElement = convertToElement(card);
+                        addToHand(cardElement);
+                    });
+                    compactHand();
+                    break;
+                case "DEAL_CARDS_SMOOTHLY":
+                    response.target.forEach(function(card) {
+                        var cardElement = convertToElement(card);
+                        dealCardSmoothly(cardElement);
+                    });
                     compactHand();
                     break;
                 case "HIGHLIGHT_ROW":
@@ -320,7 +343,6 @@
                     var where = document.querySelector("#" + response.target + ">.played-row");
                     if (where && lastClickedCard) {
                         playCardSmoothly(lastClickedCard, where);
-                        compactHand();
                     }
                     break;
                 case "EVENT_IGNORED":
@@ -328,10 +350,14 @@
                     break;
             }
         }
-        function compactHand() {
-            compactCards(document.getElementById('cards-to-play'));
+        function addToHand(card) {
+            var hand = document.getElementById("hand");
+            hand.appendChild(card);
         }
-        function processDealtCard(card) {
+        function compactHand() {
+            compactCards(document.getElementById('hand'));
+        }
+        function convertToElement(card) {
             var div = document.createElement("div");
             div.setAttribute("id", card.id);
             div.setAttribute("row", card.type);
@@ -346,13 +372,14 @@
                 div.setAttribute("healer", "true");
             }
             div.classList.add("card");
-            //TODO: allow switching between singleclick and doubleclick
-            // div.addEventListener("dblclick", clickOnCard);
+            //TODO: allow switching between singleclick and doubleclick from UI
+            div.addEventListener("dblclick",
+                    function (event) {
+                        return false;
+                    });
             div.addEventListener("click", clickOnCard);
             addFace(div);
-            var cardContainer = document.getElementById("cards-to-play");
-            cardContainer.appendChild(div);
-
+            return div;
         }
         function compactCards(container) {
             var cards = container.children;
@@ -449,7 +476,7 @@
         </span>
 
         <div class="row" id="your-hand" style="margin-top: 10px;text-align: center;">
-            <div id="cards-to-play">
+            <div id="hand">
 
             </div>
         </div>

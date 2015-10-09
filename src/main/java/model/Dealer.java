@@ -1,19 +1,25 @@
 package model;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by ysidorov on 06.10.15.
  */
 public class Dealer {
     // TODO: move from 'static' to singleton
+
+    private static Set<Card> playersDeck = new HashSet<>();
     private static Map<String, Card> dealtCards = new HashMap<>();
     private static Map<String, Card> playedCards = new HashMap<>();
+    private static Map<String, Card> perishedCards = new HashMap<>();
+    private static Map<String, Card> cardsOnDeck = new HashMap<>();
+
     private static Card rememberedCard = null;
     private static boolean isPlayingDecoy = false; // TODO: store it here
+    private static boolean isPlayingHorn = false; // TODO: store it here
+    private static List<String> highlightedCards = new ArrayList<>();
+
+
     public static Card[] dealDefaults() {
         Card[] result = {
 
@@ -57,13 +63,19 @@ public class Dealer {
         return playedCards.get(cardId);
     }
     public static void playCard(Card card) {
-        playedCards.put(card.getId(), card);
+        cardsOnDeck.put(card.getId(), card);
+        if (! card.isSpy()) {
+            playedCards.put(card.getId(), card);
+        }
     }
     public static void returnCardToHand(Card card) {
         playedCards.remove(card.getId());
+        cardsOnDeck.remove(card.getId());
     }
     public static List<String> getDecoyTargetsIds() {
         List<String> result = new ArrayList<>();
+        // played SPY card will be transferred to Opponent's played deck
+        // and won't be in playedCards
         for (Card c : playedCards.values()) {
             if (! c.isHero()) {
                 switch (c.getType()) {
@@ -92,7 +104,34 @@ public class Dealer {
         return rememberedCard;
     }
     public static boolean isCardPlayed(Card card) {
-        return Dealer.getPlayedCard(card.getId()) != null;
+        return playedCards.containsKey(card.getId());
+    }
+    public static void startPlayingDecoy() {
+        isPlayingDecoy = true;
+    }
+    public static void stopPlayingDecoy() {
+        isPlayingDecoy = false;
+    }
+    public static boolean isPlayingDecoy() {
+        return isPlayingDecoy;
+    }
+    public static void startPlayingHorn() {
+        isPlayingHorn = true;
+    }
+    public static void stopPlayingHorn() {
+        isPlayingHorn = false;
+    }
+    public static boolean isPlayingHorn() {
+        return isPlayingHorn;
+    }
+    public static List<String> getHighlightedCards() {
+        return new ArrayList<>(highlightedCards);
+    }
+    public static void addHighlightedCards(List<String> cards) {
+        highlightedCards.addAll(cards);
+    }
+    public static void clearHighlightedCards() {
+        highlightedCards.clear();
     }
     public static boolean isGoodDecoyTarget(Card card)  {
         return isCardPlayed(card) &&

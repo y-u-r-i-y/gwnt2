@@ -13,10 +13,11 @@ public class Card {
     private boolean isHealer = false;
     private boolean isSpy = false;
     private String id;
+    private int score;
     public Card() {}
 
     public Card(String face, CardType type, DeckType deckType, boolean isHero, boolean isHealer, boolean isSpy,
-                String description, String id) {
+                String description, int score, String id) {
         this.face = face;
         this.type = type;
         this.deckType = deckType;
@@ -25,6 +26,7 @@ public class Card {
         this.isSpy = isSpy;
         this.description = description;
         this.id = id;
+        this.score = score;
     }
 
     public String getFace() {
@@ -89,6 +91,14 @@ public class Card {
 
     public void setSpy(boolean isSpy) {
         this.isSpy = isSpy;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
     }
 
     @Override

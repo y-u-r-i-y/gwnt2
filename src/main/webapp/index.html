@@ -136,66 +136,12 @@
         }
 
         function clickOnCard_OLD(event) {
-            var card = event.currentTarget;
+            // var card = event.currentTarget;
             // TODO: remove after useful code is reused
             // what to highlight or where to play
             // in the manner of 'highlight: id1, id2, id3'
 
             // https://css-tricks.com/almanac/selectors/a/attribute/
-
-            if (isPlayingHorn) {
-                cancelPlayingHorn(); // because a new horn card may be clicked
-            }
-            if (isPlayingDecoy && goodDecoyTarget(card)) {
-                playDecoy(card);
-                return;
-            }
-
-            ws.send(JSON.stringify({command: "PLAY_CARD", target: card.id}));
-
-
-            return;//////////////////////////////////////////////////////////////////////////////
-
-            if (isPlayingHorn) {
-                cancelPlayingHorn(); // because a new horn card may be clicked
-            }
-            if (isPlayingDecoy && goodDecoyTarget(card)) {
-                playDecoy(card);
-                return;
-            }
-            var row = card.getAttribute("row");
-            var field;
-            switch (row) {
-                case "CLOSE":
-                    field = document.getElementById("close-combat-row");
-                    break;
-                case "RANGED":
-                    field = document.getElementById("ranged-combat-row");
-                    break;
-                case "SIEGE":
-                    field = document.getElementById("siege-combat-row");
-                    break;
-                case "HORN":
-                    prepareToPlayHorn(card);
-                    return;
-                case "DECOY":
-                    prepareToPlayDecoy(card);
-                    return;
-                case "WEATHER":
-                    if (card.getAttribute('face') == "clear") {
-                        discardCardSmoothly(card);
-                        clearWeatherEffects();
-                        return;
-                    }
-                    field = document.getElementById("weather-target");
-                    break;
-                case "LEADER":
-                    break;
-            }
-
-            if (typeof field !== 'undefined') {
-                playCardSmoothly(card, field);
-            }
         }
         function clearWeatherEffects() {
             var weather = document.getElementById("weather-target");
@@ -336,7 +282,13 @@
                     break;
                 case "UPDATE_ROW_SCORE":
                     console.log(response);
-                    // TODO: implement var row = document.getElementById(response.target);
+                    var rows = response.target;
+                    for (var row in rows) {
+                        if(rows.hasOwnProperty(row)) {
+                            console.log(row + " has score " + rows[row]);
+                            updateRowScore(row, rows[row]);
+                        }
+                    }
                     break;
                 case "PLAY_CARD":
                     console.log(response);
@@ -400,6 +352,9 @@
                 cards[i].style.marginLeft = marginDelta + "px";
             }
         }
+        function updateRowScore(rowId, score) {
+            document.querySelector("#" + rowId + " .row-score").textContent = score;
+        }
         function onresize() {
              compactHand();
             // TODO: compact rows as well
@@ -433,17 +388,17 @@
     <div id="middle">
 
         <div id="HIS_SIEGE_COMBAT_ROW" class="row">
-            <div class="row-score-his">123</div>
+            <div class="row-score his">123</div>
             <div class="row-horn"></div>
             <div class="played-row"></div>
         </div>
         <div id="HIS_RANGED_COMBAT_ROW" class="row">
-            <div class="row-score-his">123</div>
+            <div class="row-score his">123</div>
             <div class="row-horn"></div>
             <div class="played-row"></div>
         </div>
         <div id="HIS_CLOSE_COMBAT_ROW" class="row">
-            <div class="row-score-his">123</div>
+            <div class="row-score his">123</div>
             <div class="row-horn"></div>
             <div class="played-row"></div>
         </div>
@@ -457,19 +412,19 @@
         <span class="your">
         <div id="YOUR_CLOSE_COMBAT_ROW" class="row" >
             <div id="CLOSE_COMBAT_HORN" class="row-horn">
-                <div class="row-score-yours">123</div>
+                <div class="row-score yours">123</div>
             </div>
             <div class="played-row"></div>
         </div>
 
         <div id="YOUR_RANGED_COMBAT_ROW" class="row" >
-            <div class="row-score-yours">123</div>
+            <div class="row-score yours">123</div>
             <div id="RANGED_COMBAT_HORN" class="row-horn" ></div>
             <div class="played-row"></div>
         </div>
 
         <div id="YOUR_SIEGE_COMBAT_ROW" class="row" >
-            <div class="row-score-yours">123</div>
+            <div class="row-score yours">123</div>
             <div id="SIEGE_COMBAT_HORN" class="row-horn" ></div>
             <div class="played-row"></div>
         </div>

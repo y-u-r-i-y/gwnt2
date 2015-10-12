@@ -14,7 +14,7 @@ import org.junit.Test;
 public class DealingCardsTest extends BaseJsonMappingTest {
     @Test
     public void testDealOneCard() throws Exception {
-        Card card = new Card("Geralt", CardType.CLOSE, DeckType.NEUTRAL, true, false, false, "the grey one", "1");
+        Card card = new Card("Geralt", CardType.CLOSE, DeckType.NEUTRAL, true, false, false, "the grey one", 1, "1");
 
         Payload payload = new Payload(Command.DEAL_CARDS, card);
 
@@ -25,9 +25,9 @@ public class DealingCardsTest extends BaseJsonMappingTest {
 
     @Test
     public void testDealThreeCards() throws Exception {
-        Card card1 = new Card("Geralt", CardType.CLOSE, DeckType.NEUTRAL, true, false, false, "the grey one", "1");
-        Card card2 = new Card("Yen", CardType.RANGED, DeckType.NEUTRAL, true, false, false, "hot and annoying", "2");
-        Card card3 = new Card("Infantry", CardType.CLOSE, DeckType.NORTHERN, false, false, false, "poor f_cking infantry", "3");
+        Card card1 = new Card("Geralt", CardType.CLOSE, DeckType.NEUTRAL, true, false, false, "the grey one", 1, "1");
+        Card card2 = new Card("Yen", CardType.RANGED, DeckType.NEUTRAL, true, false, false, "hot and annoying", 1, "2");
+        Card card3 = new Card("Infantry", CardType.CLOSE, DeckType.NORTHERN, false, false, false, "poor f_cking infantry", 1, "3");
 
         Payload payload = new Payload(Command.DEAL_CARDS, new Card[]{card1, card2, card3});
 

@@ -23,7 +23,7 @@ div {
     margin: 2px 5px 2px 20px;
     position: relative;
 }
-.row-score-yours {
+.row-score.yours {
     margin: 0 auto;
     position: absolute;
     left: -42px;
@@ -37,7 +37,7 @@ div {
     align-items: center;
     font-weight: bolder;
 }
-.row-score-his {
+.row-score.his {
     margin: 0 auto;
     position: absolute;
     left: -42px;

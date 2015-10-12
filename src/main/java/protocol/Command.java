@@ -31,7 +31,7 @@ public enum Command {
     RESTORE_CARD,
 
     UPDATE_ROW_SCORE,
-    UPDATE_SCORE,
+    UPDATE_GAME_STATE,
 
     EVENT_IGNORED, // target is error message
     OK,

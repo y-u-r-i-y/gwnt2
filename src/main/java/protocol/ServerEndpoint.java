@@ -6,6 +6,7 @@ import model.Dealer;
 
 import javax.websocket.*;
 import java.io.IOException;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -61,13 +62,11 @@ public class ServerEndpoint {
         } catch (IllegalArgumentException e) {
             sendResponse(session, new Payload(Command.EVENT_IGNORED, "bad horn target"));
         }
-
         if (Dealer.isPlayingHorn()) {
-            Dealer.playCard(Dealer.getRememberedCard());
-            Dealer.clearRememberedCard();
-            Dealer.stopPlayingHorn();
+            Dealer.playHorn(hornTarget);
             sendResponse(session, new Payload(Command.PLAY_HORN, hornTarget));
             sendResponse(session, new Payload(Command.TOGGLE_HIGHLIGHT_HORN_TARGETS, null));
+            sendResponse(session, new Payload(Command.UPDATE_ROW_SCORE, Dealer.getRowScores()));
         } else {
             sendResponse(session, new Payload(Command.EVENT_IGNORED, "not playing horn"));
         }
@@ -148,25 +147,24 @@ public class ServerEndpoint {
         if (card.isSpy()) {
             sendResponse(session, new Payload(Command.DEAL_CARDS_SMOOTHLY, Dealer.dealCards(2)));
         }
+
+        sendResponse(session, new Payload(Command.UPDATE_ROW_SCORE, Dealer.getRowScores()));
     }
 
     private void playDecoy(Session session, Card card) throws IOException, EncodeException {
         Card decoy = Dealer.getRememberedCard();
-        Dealer.playCard(decoy);
-        Dealer.returnCardToHand(card);
+        sendResponse(session, new Payload(Command.TOGGLE_HIGHLIGHT_CARDS, Dealer.getHighlightedCards())); // remove highlight before clearing highlighted cards
         sendResponse(session, new Payload(Command.SWITCH_CARDS, new SwitchPair(decoy.getId(), card.getId())));
-        sendResponse(session, new Payload(Command.TOGGLE_HIGHLIGHT_CARDS, Dealer.getHighlightedCards())); // remove highlight
-        Dealer.clearRememberedCard();
-        Dealer.clearHighlightedCards();
-        Dealer.stopPlayingDecoy();
+        Dealer.playDecoyOnCard(card); // order is important
+        sendResponse(session, new Payload(Command.UPDATE_ROW_SCORE, Dealer.getRowScores()));
     }
-     private void sendResponse(Session session, Payload response) throws IOException, EncodeException {
+    private void sendResponse(Session session, Payload response) throws IOException, EncodeException {
         session.getBasicRemote().sendObject(response);
     }
      private void cancelPlayingHorn(Session session) throws IOException, EncodeException {
-        sendResponse(session, new Payload(Command.TOGGLE_HIGHLIGHT_HORN_TARGETS, null));
         Dealer.stopPlayingHorn();
         Dealer.clearRememberedCard();
+        sendResponse(session, new Payload(Command.TOGGLE_HIGHLIGHT_HORN_TARGETS, null));
     }
     private void cancelPlayingDecoy(Session session) throws IOException, EncodeException {
         sendResponse(session, new Payload(Command.TOGGLE_HIGHLIGHT_CARDS, Dealer.getHighlightedCards())); // remove highlight

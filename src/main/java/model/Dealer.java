@@ -1,5 +1,8 @@
 package model;
 
+import protocol.HornTarget;
+import protocol.Row;
+
 import java.util.*;
 
 /**
@@ -14,6 +17,11 @@ public class Dealer {
     private static Map<String, Card> perishedCards = new HashMap<>();
     private static Map<String, Card> cardsOnDeck = new HashMap<>();
 
+    private static Map<Row, RowState> rowStates = new HashMap<>();
+    static {
+        resetRowStates();
+    }
+
     private static Card rememberedCard = null;
     private static boolean isPlayingDecoy = false; // TODO: store it here
     private static boolean isPlayingHorn = false; // TODO: store it here
@@ -26,18 +34,18 @@ public class Dealer {
                 // TODO: add SPECIAL attribute ?
 
 
-            new Card("geralt", CardType.CLOSE, DeckType.NEUTRAL, true, false, false, "Geralt", IdGenerator.nextId()),
-            new Card("roche", CardType.CLOSE, DeckType.NORTHERN, true, false, false, "Roche", IdGenerator.nextId()),
-            new Card("dijkstra", CardType.CLOSE, DeckType.NORTHERN, false, false, true, "Spy", IdGenerator.nextId()),
-            new Card("keira", CardType.RANGED, DeckType.NORTHERN, false, false, false, "", IdGenerator.nextId()),
-            new Card("catapult", CardType.SIEGE, DeckType.NORTHERN, false, false, false, "", IdGenerator.nextId()),
-            new Card("horn", CardType.HORN, DeckType.NEUTRAL, false, false, false, "", IdGenerator.nextId()),
-            new Card("frost", CardType.WEATHER, DeckType.NEUTRAL, false, false, false, "", IdGenerator.nextId()),
-            new Card("rain", CardType.WEATHER, DeckType.NEUTRAL, false, false, false, "", IdGenerator.nextId()),
-            new Card("clear", CardType.WEATHER, DeckType.NEUTRAL, false, false, false, "", IdGenerator.nextId()),
-            new Card("decoy", CardType.DECOY, DeckType.NEUTRAL, false, false, false, "", IdGenerator.nextId()),
-            new Card("medic", CardType.SIEGE, DeckType.NORTHERN, false, true, false, "", IdGenerator.nextId()),
-            new Card("infantry", CardType.CLOSE, DeckType.NORTHERN, false, false, false, "poor f. infantry", IdGenerator.nextId()),
+            new Card("geralt", CardType.CLOSE, DeckType.NEUTRAL, true, false, false, "Geralt", 15, IdGenerator.nextId()),
+            new Card("roche", CardType.CLOSE, DeckType.NORTHERN, true, false, false, "Roche", 10, IdGenerator.nextId()),
+            new Card("dijkstra", CardType.CLOSE, DeckType.NORTHERN, false, false, true, "Spy", 4, IdGenerator.nextId()),
+            new Card("keira", CardType.RANGED, DeckType.NORTHERN, false, false, false, "", 5, IdGenerator.nextId()),
+            new Card("catapult", CardType.SIEGE, DeckType.NORTHERN, false, false, false, "", 8, IdGenerator.nextId()),
+            new Card("horn", CardType.HORN, DeckType.NEUTRAL, false, false, false, "", 0, IdGenerator.nextId()),
+            new Card("frost", CardType.WEATHER, DeckType.NEUTRAL, false, false, false, "", 0, IdGenerator.nextId()),
+            new Card("rain", CardType.WEATHER, DeckType.NEUTRAL, false, false, false, "", 0, IdGenerator.nextId()),
+            new Card("clear", CardType.WEATHER, DeckType.NEUTRAL, false, false, false, "", 0, IdGenerator.nextId()),
+            new Card("decoy", CardType.DECOY, DeckType.NEUTRAL, false, false, false, "", 0, IdGenerator.nextId()),
+            new Card("medic", CardType.SIEGE, DeckType.NORTHERN, false, true, false, "", 5, IdGenerator.nextId()),
+            new Card("infantry", CardType.CLOSE, DeckType.NORTHERN, false, false, false, "poor f. infantry", 1, IdGenerator.nextId()),
         };
 
         for (Card card : result) {
@@ -48,7 +56,7 @@ public class Dealer {
     public static Card[] dealCards(int count) {
         Card[] result = new Card[count];
         for (int i = 0; i < count; i++) {
-            Card c = new Card("infantry", CardType.CLOSE, DeckType.NORTHERN, false, false, false, "poor f. infantry", IdGenerator.nextId());
+            Card c = new Card("infantry", CardType.CLOSE, DeckType.NORTHERN, false, false, false, "poor f. infantry", 1, IdGenerator.nextId());
             result[i] = c;
             dealtCards.put(c.getId(), c);
         }
@@ -92,6 +100,40 @@ public class Dealer {
     public static void reset() {
         dealtCards.clear();
         playedCards.clear();
+        resetRowStates();
+    }
+    public static void resetRowStates() {
+        for (Row row : Row.values()) {
+            rowStates.put(row, new RowState());
+        }
+    }
+    public static void playDecoyOnCard(Card card) {
+        Card decoy = Dealer.getRememberedCard();
+        Dealer.playCard(decoy);
+        Dealer.returnCardToHand(card);
+        Dealer.clearRememberedCard();
+        Dealer.clearHighlightedCards();
+        Dealer.stopPlayingDecoy();
+    }
+    public static void playHorn(HornTarget target) {
+        Row row;
+        switch (target) {
+            case CLOSE_COMBAT_HORN:
+                row = Row.YOUR_CLOSE_COMBAT_ROW;
+                break;
+            case RANGED_COMBAT_HORN:
+                row = Row.YOUR_RANGED_COMBAT_ROW;
+                break;
+            case SIEGE_COMBAT_HORN:
+                row = Row.YOUR_SIEGE_COMBAT_ROW;
+                break;
+            default:
+                throw new IllegalArgumentException("no such horn target: " + target);
+        }
+        rowStates.get(row).hornPlayed = true;
+        Dealer.playCard(Dealer.getRememberedCard());
+        Dealer.clearRememberedCard();
+        Dealer.stopPlayingHorn();
     }
 
     public static void rememberCard(Card card) {
@@ -140,5 +182,33 @@ public class Dealer {
                         || CardType.LEADER.equals(card.getType())
                         || CardType.HORN.equals(card.getType()));
     }
-
+    public static Map<Row, Integer> getRowScores() {
+        Map<Row, Integer> scores = new HashMap<>();
+        for (Row row : Row.values()) {
+            scores.put(row, 0);
+        }
+        for (Card card : cardsOnDeck.values()) {
+            int score = card.getScore();
+            Row row;
+            switch (card.getType()) {
+                case CLOSE:
+                    row = card.isSpy() ? Row.HIS_CLOSE_COMBAT_ROW : Row.YOUR_CLOSE_COMBAT_ROW;
+                    break;
+                case RANGED:
+                    row = card.isSpy() ? Row.HIS_RANGED_COMBAT_ROW : Row.YOUR_RANGED_COMBAT_ROW;
+                    break;
+                case SIEGE:
+                    row = card.isSpy() ? Row.HIS_SIEGE_COMBAT_ROW : Row.YOUR_SIEGE_COMBAT_ROW;
+                    break;
+                default:
+                    continue;
+            }
+            if (rowStates.get(row).hornPlayed && ! card.isHero()) {
+                score *= 2;
+            }
+            // TODO: take into account weather effects
+            scores.put(row, scores.get(row) + score);
+        }
+        return scores;
+    }
 }

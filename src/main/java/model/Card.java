@@ -8,7 +8,8 @@ public class Card {
     private String face;
     private String description;
     private CardType type;
-    private DeckType deckType;
+    private Deck deck;
+    private Bond bond = Bond.NONE;
     private boolean isHero = false;
     private boolean isHealer = false;
     private boolean isSpy = false;
@@ -16,17 +17,49 @@ public class Card {
     private int score;
     public Card() {}
 
-    public Card(String face, CardType type, DeckType deckType, boolean isHero, boolean isHealer, boolean isSpy,
-                String description, int score, String id) {
+    public Card(String id, String face, CardType type, Deck deck, int score,
+                String description, boolean isHero, boolean isHealer, boolean isSpy,
+                Bond bond) {
         this.face = face;
         this.type = type;
-        this.deckType = deckType;
+        this.deck = deck;
         this.isHero = isHero;
         this.isHealer = isHealer;
         this.isSpy = isSpy;
         this.description = description;
         this.id = id;
         this.score = score;
+        this.bond = bond;
+    }
+    public Card(String id, String face, CardType type, Deck deck, int score,
+                String description, boolean isHero, boolean isHealer, boolean isSpy) {
+        this.face = face;
+        this.type = type;
+        this.deck = deck;
+        this.isHero = isHero;
+        this.isHealer = isHealer;
+        this.isSpy = isSpy;
+        this.description = description;
+        this.id = id;
+        this.score = score;
+    }
+
+    public Card(String id, String face, CardType type, Deck deck, int score, String description) {
+        this.id = id;
+        this.face = face;
+        this.type = type;
+        this.deck = deck;
+        this.score = score;
+        this.description = description;
+    }
+    public Card(String id, String face, CardType type, Deck deck, int score, String description, Bond bond) {
+        this.id = id;
+        this.face = face;
+        this.type = type;
+        this.deck = deck;
+        this.score = score;
+        this.description = description;
+        this.bond = bond;
     }
 
     public String getFace() {
@@ -69,12 +102,12 @@ public class Card {
         this.isHealer = isHealer;
     }
 
-    public DeckType getDeckType() {
-        return deckType;
+    public Deck getDeck() {
+        return deck;
     }
 
-    public void setDeckType(DeckType deckType) {
-        this.deckType = deckType;
+    public void setDeck(Deck deck) {
+        this.deck = deck;
     }
 
     public String getId() {
@@ -99,6 +132,14 @@ public class Card {
 
     public void setScore(int score) {
         this.score = score;
+    }
+
+    public Bond getBond() {
+        return bond;
+    }
+
+    public void setBond(Bond bond) {
+        this.bond = bond;
     }
 
     @Override

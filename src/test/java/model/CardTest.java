@@ -1,11 +1,7 @@
 package model;
 
 import model.json.BaseJsonMappingTest;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
 
@@ -13,7 +9,7 @@ public class CardTest extends BaseJsonMappingTest{
 
     @Test
     public void testSimpleCardSerialize() throws IOException {
-        Card c = new Card("Geralt", CardType.CLOSE, DeckType.NEUTRAL, true, false, false, "the grey one", 1, "1");
+        Card c = new Card(IdGenerator.nextId(), "geralt", CardType.CLOSE, Deck.NEUTRAL, 15, "Geralt", true, false, false);
         c.setHero(true);
 
         String asString = toJson(c);
@@ -28,7 +24,7 @@ public class CardTest extends BaseJsonMappingTest{
     }
     @Test
     public void testSimpleCardDeSerializeBothWays() throws IOException {
-        Card c = new Card("Geralt", CardType.CLOSE, DeckType.NEUTRAL, true, false, false, "the grey one", 1, "1");
+        Card c = new Card(IdGenerator.nextId(), "geralt", CardType.CLOSE, Deck.NEUTRAL, 15, "Geralt", true, false, false);
 
         String asString = toJson(c);
 

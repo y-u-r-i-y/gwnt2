@@ -17,6 +17,8 @@ public class Dealer {
     private static Map<String, Card> perishedCards = new HashMap<>();
     private static Map<String, Card> cardsOnDeck = new HashMap<>();
 
+    private static Map<Bond, List<Card>> bondMap = new HashMap<>();
+
     private static Map<Row, RowState> rowStates = new HashMap<>();
     static {
         resetRowStates();
@@ -33,19 +35,18 @@ public class Dealer {
 
                 // TODO: add SPECIAL attribute ?
 
-
-            new Card("geralt", CardType.CLOSE, DeckType.NEUTRAL, true, false, false, "Geralt", 15, IdGenerator.nextId()),
-            new Card("roche", CardType.CLOSE, DeckType.NORTHERN, true, false, false, "Roche", 10, IdGenerator.nextId()),
-            new Card("dijkstra", CardType.CLOSE, DeckType.NORTHERN, false, false, true, "Spy", 4, IdGenerator.nextId()),
-            new Card("keira", CardType.RANGED, DeckType.NORTHERN, false, false, false, "", 5, IdGenerator.nextId()),
-            new Card("catapult", CardType.SIEGE, DeckType.NORTHERN, false, false, false, "", 8, IdGenerator.nextId()),
-            new Card("horn", CardType.HORN, DeckType.NEUTRAL, false, false, false, "", 0, IdGenerator.nextId()),
-            new Card("frost", CardType.WEATHER, DeckType.NEUTRAL, false, false, false, "", 0, IdGenerator.nextId()),
-            new Card("rain", CardType.WEATHER, DeckType.NEUTRAL, false, false, false, "", 0, IdGenerator.nextId()),
-            new Card("clear", CardType.WEATHER, DeckType.NEUTRAL, false, false, false, "", 0, IdGenerator.nextId()),
-            new Card("decoy", CardType.DECOY, DeckType.NEUTRAL, false, false, false, "", 0, IdGenerator.nextId()),
-            new Card("medic", CardType.SIEGE, DeckType.NORTHERN, false, true, false, "", 5, IdGenerator.nextId()),
-            new Card("infantry", CardType.CLOSE, DeckType.NORTHERN, false, false, false, "poor f. infantry", 1, IdGenerator.nextId()),
+            new Card(IdGenerator.nextId(), "geralt", CardType.CLOSE, Deck.NEUTRAL, 15, "Geralt", true, false, false),
+            new Card(IdGenerator.nextId(), "roche", CardType.CLOSE, Deck.NORTHERN, 10, "Roche", true, false, false),
+            new Card(IdGenerator.nextId(), "dijkstra", CardType.CLOSE, Deck.NORTHERN, 4, "Spy", false, false, true),
+            new Card(IdGenerator.nextId(), "keira", CardType.RANGED, Deck.NORTHERN, 5, "Keira"),
+            new Card(IdGenerator.nextId(), "catapult", CardType.SIEGE, Deck.NORTHERN, 8, "catapult"),
+            new Card(IdGenerator.nextId(), "horn", CardType.HORN, Deck.NEUTRAL, 0, "horn"),
+            new Card(IdGenerator.nextId(), "frost", CardType.WEATHER, Deck.NEUTRAL, 0, "frost"),
+            new Card(IdGenerator.nextId(), "rain", CardType.WEATHER, Deck.NEUTRAL, 0, "frost"),
+            new Card(IdGenerator.nextId(), "clear", CardType.WEATHER, Deck.NEUTRAL, 0, "clear"),
+            new Card(IdGenerator.nextId(), "decoy", CardType.DECOY, Deck.NEUTRAL, 0, "decoy"),
+            new Card(IdGenerator.nextId(), "medic", CardType.SIEGE, Deck.NORTHERN, 5, "medic"),
+            new Card(IdGenerator.nextId(), "infantry", CardType.CLOSE, Deck.NORTHERN, 1, "pfi", Bond.NORTHERN_INFANTRY),
         };
 
         for (Card card : result) {
@@ -56,7 +57,7 @@ public class Dealer {
     public static Card[] dealCards(int count) {
         Card[] result = new Card[count];
         for (int i = 0; i < count; i++) {
-            Card c = new Card("infantry", CardType.CLOSE, DeckType.NORTHERN, false, false, false, "poor f. infantry", 1, IdGenerator.nextId());
+            Card c = new Card(IdGenerator.nextId(), "infantry", CardType.CLOSE, Deck.NORTHERN, 1, "pfi", Bond.NORTHERN_INFANTRY);
             result[i] = c;
             dealtCards.put(c.getId(), c);
         }
@@ -100,6 +101,9 @@ public class Dealer {
     public static void reset() {
         dealtCards.clear();
         playedCards.clear();
+        perishedCards.clear();
+        cardsOnDeck.clear();
+        bondMap.clear();
         resetRowStates();
     }
     public static void resetRowStates() {
@@ -210,5 +214,24 @@ public class Dealer {
             scores.put(row, scores.get(row) + score);
         }
         return scores;
+    }
+
+    public static boolean hasBondedCardOnDesk(Card card) { // or is isBondInPlay a better name?
+        return bondMap.containsKey(card.getBond());
+    }
+
+    public static String getFirstBondedCardId(Card card) {
+        return bondMap.get(card.getBond()).get(0).getId();
+    }
+
+    public static void createBond(Card card) {
+        List<Card> newBondedGroup = new ArrayList<>();
+        newBondedGroup.add(card);
+        bondMap.put(card.getBond(), newBondedGroup);
+    }
+
+    public static List<String> getAllBondedCardIds(Card card) {
+        // return bondMap.get(card.getBond()).; TODO: implement bond highlighting
+        return Collections.emptyList();
     }
 }

@@ -1,12 +1,12 @@
 package protocol;
 
+import model.Bond;
 import model.Card;
 import model.CardType;
 import model.Dealer;
 
 import javax.websocket.*;
 import java.io.IOException;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -99,13 +99,26 @@ public class ServerEndpoint {
             }
         }
         if (Dealer.isPlayingHorn()) {
-            cancelPlayingHorn(session);// clicked on another card in hand - stop playing horn
+            cancelPlayingHorn(session);// clicked on another card in hand - stop playing this (current) horn
         }
+
         if (card.isHealer()) {
             // TODO: implement selection of one of perished cards
             sendResponse(session, new Payload(Command.DEAL_CARDS_SMOOTHLY, Dealer.dealCards(1)));
         }
+
+        if (hasBond(card)) {
+            if (Dealer.hasBondedCardOnDesk(card)) {
+                sendResponse(session, new Payload(Command.PLAY_BONDED_CARD_NEAR, Dealer.getFirstBondedCardId(card)));
+                sendResponse(session, new Payload(Command.TOGGLE_HIGHLIGHT_BONDED_CARDS, Dealer.getAllBondedCardIds(card)));
+                return;
+            } else {
+                Dealer.createBond(card);
+            }
+        }
+
         CardType type = card.getType();
+
         switch (type) {
             case CLOSE:
                 response = new Payload(Command.PLAY_CARD, getCardRow(card));
@@ -149,6 +162,10 @@ public class ServerEndpoint {
         }
 
         sendResponse(session, new Payload(Command.UPDATE_ROW_SCORE, Dealer.getRowScores()));
+    }
+
+    private boolean hasBond(Card card) {
+        return ! Bond.NONE.equals(card.getBond());
     }
 
     private void playDecoy(Session session, Card card) throws IOException, EncodeException {

@@ -4,6 +4,8 @@ import protocol.HornTarget;
 import protocol.Row;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by ysidorov on 06.10.15.
@@ -224,14 +226,20 @@ public class Dealer {
         return bondMap.get(card.getBond()).get(0).getId();
     }
 
-    public static void createBond(Card card) {
-        List<Card> newBondedGroup = new ArrayList<>();
-        newBondedGroup.add(card);
-        bondMap.put(card.getBond(), newBondedGroup);
+    public static void addBondedCard(Card card) {
+        if (! bondMap.containsKey(card.getBond())) {
+            bondMap.put(card.getBond(), new ArrayList<>());
+        }
+        bondMap.get(card.getBond()).add(card);
+    }
+    public static void removeBondedCard(Card card) {
+        if (! bondMap.containsKey(card.getBond())) {
+            bondMap.get(card.getBond()).remove(card);
+        }
     }
 
     public static List<String> getAllBondedCardIds(Card card) {
-        // return bondMap.get(card.getBond()).; TODO: implement bond highlighting
-        return Collections.emptyList();
+        Stream<String> stream = bondMap.get(card.getBond()).stream().map(Card::getId);
+        return stream.collect(Collectors.toList());
     }
 }

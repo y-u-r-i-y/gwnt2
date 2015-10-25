@@ -154,3 +154,6 @@ div {
 .highlighted-target:hover {
     border: 1px solid transparent;
 }
+.bonded {
+    outline: 3px solid darkorange;
+}

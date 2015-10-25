@@ -159,13 +159,19 @@ function discardCardSmoothly(card, timeout) {
         card.parentNode.removeChild(card);
     }, timeout);
 }
-function playCardSmoothly(card, field) {
+function playCardSmoothly(card, target) {
     card.classList.toggle('hidden');
     setTimeout(
         function() {
-            field.appendChild(card);
             card.style.marginLeft = "0px";
-            compactCards(field);
+            if (target.classList.contains('card')) {
+                target.parentNode.insertBefore(card, target); // insert a bonded card; here target is another bonded card
+                compactCards(target.parentNode);
+            } else {
+                target.appendChild(card); // append a usual card, here target is a card row
+                compactCards(target);
+            }
+
             compactHand();
             setTimeout(
                 function() {
@@ -300,7 +306,19 @@ function onMessage(msg) {
         case "PLAY_BONDED_CARD_NEAR":
             console.log(response);
             var bondedCard = document.getElementById(response.target);
-            bondedCard.parentNode.insertBefore(lastClickedCard, bondedCard);
+            playCardSmoothly(lastClickedCard, bondedCard);
+            break;
+        case "SHOW_BOND_ON_CARDS":
+            console.log(response);
+            response.target.forEach(function(id){
+                document.getElementById(id).classList.add('bonded');
+            });
+            break;
+        case "HIDE_BOND_ON_CARDS":
+            console.log(response);
+            response.target.forEach(function(id){
+                document.getElementById(id).classList.remove('bonded');
+            });
             break;
         case "EVENT_IGNORED":
             console.log(response);

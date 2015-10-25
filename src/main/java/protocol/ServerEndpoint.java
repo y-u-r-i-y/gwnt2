@@ -110,10 +110,12 @@ public class ServerEndpoint {
         if (hasBond(card)) {
             if (Dealer.hasBondedCardOnDesk(card)) {
                 sendResponse(session, new Payload(Command.PLAY_BONDED_CARD_NEAR, Dealer.getFirstBondedCardId(card)));
-                sendResponse(session, new Payload(Command.TOGGLE_HIGHLIGHT_BONDED_CARDS, Dealer.getAllBondedCardIds(card)));
+                Dealer.addBondedCard(card);
+                sendResponse(session, new Payload(Command.SHOW_BOND_ON_CARDS, Dealer.getAllBondedCardIds(card)));
+                // TODO: how to remove bonded cards?
                 return;
             } else {
-                Dealer.createBond(card);
+                Dealer.addBondedCard(card);
             }
         }
 

@@ -26,6 +26,7 @@ public enum Command {
 
     PLAY_CARD,
     PLAY_WEATHER,
+    CLEAR_WEATHER,
     PLAY_HORN,
     SWITCH_CARDS,
     WEAKEN_CARDS,

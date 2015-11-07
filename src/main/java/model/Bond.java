@@ -6,5 +6,5 @@ package model;
 public enum Bond {
     NONE,
     NORTHERN_INFANTRY,
-    NORTHERN_SPEC_OPS
+    NORTHERN_COMMANDO
 }

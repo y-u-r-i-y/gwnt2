@@ -19,7 +19,7 @@ public class Dealer {
     private static Map<String, Card> perishedCards = new HashMap<>();
     private static Map<String, Card> cardsOnDeck = new HashMap<>();
 
-    private static Map<Bond, List<Card>> bondMap = new HashMap<>();
+    private static Map<Bond, List<Card>> bonds = new HashMap<>();
 
     private static Map<Row, RowState> rowStates = new HashMap<>();
     static {
@@ -43,12 +43,14 @@ public class Dealer {
             new Card(IdGenerator.nextId(), "keira", CardType.RANGED, Deck.NORTHERN, 5, "Keira"),
             new Card(IdGenerator.nextId(), "catapult", CardType.SIEGE, Deck.NORTHERN, 8, "catapult"),
             new Card(IdGenerator.nextId(), "horn", CardType.HORN, Deck.NEUTRAL, 0, "horn"),
-            new Card(IdGenerator.nextId(), "frost", CardType.WEATHER, Deck.NEUTRAL, 0, "frost"),
-            new Card(IdGenerator.nextId(), "rain", CardType.WEATHER, Deck.NEUTRAL, 0, "frost"),
-            new Card(IdGenerator.nextId(), "clear", CardType.WEATHER, Deck.NEUTRAL, 0, "clear"),
+            new Card(IdGenerator.nextId(), "frost", CardType.FROST, Deck.NEUTRAL, 0, "frost"),
+            new Card(IdGenerator.nextId(), "rain", CardType.RAIN, Deck.NEUTRAL, 0, "frost"),
+            new Card(IdGenerator.nextId(), "fog", CardType.FOG, Deck.NEUTRAL, 0, "fog"),
+            new Card(IdGenerator.nextId(), "clear", CardType.SUNNY, Deck.NEUTRAL, 0, "clear"),
             new Card(IdGenerator.nextId(), "decoy", CardType.DECOY, Deck.NEUTRAL, 0, "decoy"),
             new Card(IdGenerator.nextId(), "medic", CardType.SIEGE, Deck.NORTHERN, 5, "medic"),
             new Card(IdGenerator.nextId(), "infantry", CardType.CLOSE, Deck.NORTHERN, 1, "pfi", Bond.NORTHERN_INFANTRY),
+            new Card(IdGenerator.nextId(), "commando", CardType.CLOSE, Deck.NORTHERN, 4, "bsc", Bond.NORTHERN_COMMANDO),
         };
 
         for (Card card : result) {
@@ -77,6 +79,30 @@ public class Dealer {
         cardsOnDeck.put(card.getId(), card);
         if (! card.isSpy()) {
             playedCards.put(card.getId(), card);
+        } else {
+            cardsOnDeck.put(card.getId(), card);
+        }
+        switch (card.getType()) {
+            case FROST:
+                rowStates.get(Row.YOUR_CLOSE_COMBAT_ROW).affectedByWeather = true;
+                rowStates.get(Row.HIS_SIEGE_COMBAT_ROW).affectedByWeather = true;
+                break;
+            case RAIN:
+                rowStates.get(Row.YOUR_RANGED_COMBAT_ROW).affectedByWeather = true;
+                rowStates.get(Row.HIS_RANGED_COMBAT_ROW).affectedByWeather = true;
+                break;
+            case FOG:
+                rowStates.get(Row.YOUR_SIEGE_COMBAT_ROW).affectedByWeather = true;
+                rowStates.get(Row.HIS_SIEGE_COMBAT_ROW).affectedByWeather = true;
+                break;
+            case SUNNY:
+                rowStates.get(Row.YOUR_CLOSE_COMBAT_ROW).affectedByWeather = false;
+                rowStates.get(Row.HIS_CLOSE_COMBAT_ROW).affectedByWeather = false;
+                rowStates.get(Row.YOUR_RANGED_COMBAT_ROW).affectedByWeather = false;
+                rowStates.get(Row.HIS_RANGED_COMBAT_ROW).affectedByWeather = false;
+                rowStates.get(Row.YOUR_SIEGE_COMBAT_ROW).affectedByWeather = false;
+                rowStates.get(Row.HIS_SIEGE_COMBAT_ROW).affectedByWeather = false;
+            break;
         }
     }
     public static void returnCardToHand(Card card) {
@@ -105,7 +131,7 @@ public class Dealer {
         playedCards.clear();
         perishedCards.clear();
         cardsOnDeck.clear();
-        bondMap.clear();
+        bonds.clear();
         resetRowStates();
     }
     public static void resetRowStates() {
@@ -120,6 +146,7 @@ public class Dealer {
         Dealer.clearRememberedCard();
         Dealer.clearHighlightedCards();
         Dealer.stopPlayingDecoy();
+        bonds.remove(card.getBond());
     }
     public static void playHorn(HornTarget target) {
         Row row;
@@ -184,7 +211,10 @@ public class Dealer {
     public static boolean isGoodDecoyTarget(Card card)  {
         return isCardPlayed(card) &&
                 ! (card.isHero()
-                        || CardType.WEATHER.equals(card.getType())
+                        || CardType.FROST.equals(card.getType())
+                        || CardType.RAIN.equals(card.getType())
+                        || CardType.FOG.equals(card.getType())
+                        || CardType.SUNNY.equals(card.getType())
                         || CardType.LEADER.equals(card.getType())
                         || CardType.HORN.equals(card.getType()));
     }
@@ -194,7 +224,7 @@ public class Dealer {
             scores.put(row, 0);
         }
         for (Card card : cardsOnDeck.values()) {
-            int score = card.getScore();
+            int strength = card.getScore();
             Row row;
             switch (card.getType()) {
                 case CLOSE:
@@ -209,37 +239,45 @@ public class Dealer {
                 default:
                     continue;
             }
-            if (rowStates.get(row).hornPlayed && ! card.isHero()) {
-                score *= 2;
+            if (! card.isHero()) {
+                /*
+                *  rules for strength calculation (order is important):
+                * 1. weather effect - reduces strength to 1
+                * 2. tight bond effect - each card doubles strength of all cards with the same bond
+                * 3. horn effect - doubles strength
+                */
+                if (rowStates.get(row).affectedByWeather) {
+                    strength = 1;
+                }
+                if (bonds.containsKey(card.getBond())) {
+                    int bondedCardsCount = bonds.get(card.getBond()).size();
+                    strength = strength << (bondedCardsCount - 1);
+                }
+                if (rowStates.get(row).hornPlayed) {
+                    strength *= 2;
+                }
             }
-            // TODO: take into account weather effects
-            scores.put(row, scores.get(row) + score);
+            scores.put(row, scores.get(row) + strength);
         }
         return scores;
     }
 
     public static boolean hasBondedCardOnDesk(Card card) { // or is isBondInPlay a better name?
-        return bondMap.containsKey(card.getBond());
+        return bonds.containsKey(card.getBond());
     }
 
     public static String getFirstBondedCardId(Card card) {
-        return bondMap.get(card.getBond()).get(0).getId();
+        return bonds.get(card.getBond()).get(0).getId();
     }
 
     public static void addBondedCard(Card card) {
-        if (! bondMap.containsKey(card.getBond())) {
-            bondMap.put(card.getBond(), new ArrayList<>());
+        if (! bonds.containsKey(card.getBond())) {
+            bonds.put(card.getBond(), new ArrayList<>());
         }
-        bondMap.get(card.getBond()).add(card);
+        bonds.get(card.getBond()).add(card);
     }
-    public static void removeBondedCard(Card card) {
-        if (! bondMap.containsKey(card.getBond())) {
-            bondMap.get(card.getBond()).remove(card);
-        }
-    }
-
     public static List<String> getAllBondedCardIds(Card card) {
-        Stream<String> stream = bondMap.get(card.getBond()).stream().map(Card::getId);
+        Stream<String> stream = bonds.get(card.getBond()).stream().map(Card::getId);
         return stream.collect(Collectors.toList());
     }
 }

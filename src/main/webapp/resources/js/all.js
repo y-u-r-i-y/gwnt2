@@ -146,11 +146,9 @@ function clickOnCard_OLD(event) {
 function clearWeatherEffects() {
     var weather = document.getElementById("weather-target");
     var currentWeatherEffects = weather.children;
-    /* flushElement(weather); */
-
     toArray(currentWeatherEffects).forEach(
         function(card) { discardCardSmoothly(card, 1000); });
-    clearDescription();
+    //clearDescription();
 }
 function discardCardSmoothly(card, timeout) {
     timeout = timeout || 400;
@@ -165,10 +163,10 @@ function playCardSmoothly(card, target) {
         function() {
             card.style.marginLeft = "0px";
             if (target.classList.contains('card')) {
-                target.parentNode.insertBefore(card, target); // insert a bonded card; here target is another bonded card
+                target.parentNode.insertBefore(card, target); // insert a bonded card; target is another bonded card
                 compactCards(target.parentNode);
             } else {
-                target.appendChild(card); // append a usual card, here target is a card row
+                target.appendChild(card); // append a usual card, target is a card row
                 compactCards(target);
             }
 
@@ -279,6 +277,11 @@ function onMessage(msg) {
             console.log(response);
             var weatherTarget = document.getElementById("weather-target");
             playCardSmoothly(lastClickedCard, weatherTarget);
+            break;
+        case "CLEAR_WEATHER":
+            console.log(response);
+            clearWeatherEffects();
+            discardCardSmoothly(document.getElementById(response.target));
             break;
         case "SWITCH_CARDS":
             console.log(response);

@@ -112,8 +112,6 @@ public class ServerEndpoint {
                 sendResponse(session, new Payload(Command.PLAY_BONDED_CARD_NEAR, Dealer.getFirstBondedCardId(card)));
                 Dealer.addBondedCard(card);
                 sendResponse(session, new Payload(Command.SHOW_BOND_ON_CARDS, Dealer.getAllBondedCardIds(card)));
-                // TODO: how to remove bonded cards?
-                return;
             } else {
                 Dealer.addBondedCard(card);
             }
@@ -144,8 +142,14 @@ public class ServerEndpoint {
                 break;
             case LEADER:
                 break;
-            case WEATHER:
+            case FROST:
+            case RAIN:
+            case FOG:
                 response = new Payload(Command.PLAY_WEATHER, null);
+                Dealer.playCard(card);
+                break;
+            case SUNNY:
+                response = new Payload(Command.CLEAR_WEATHER, cardId);
                 Dealer.playCard(card);
                 break;
             case HORN:
@@ -174,7 +178,7 @@ public class ServerEndpoint {
         Card decoy = Dealer.getRememberedCard();
         sendResponse(session, new Payload(Command.TOGGLE_HIGHLIGHT_CARDS, Dealer.getHighlightedCards())); // remove highlight before clearing highlighted cards
         sendResponse(session, new Payload(Command.SWITCH_CARDS, new SwitchPair(decoy.getId(), card.getId())));
-        Dealer.playDecoyOnCard(card); // order is important
+        Dealer.playDecoyOnCard(card);
         sendResponse(session, new Payload(Command.UPDATE_ROW_SCORE, Dealer.getRowScores()));
     }
     private void sendResponse(Session session, Payload response) throws IOException, EncodeException {
